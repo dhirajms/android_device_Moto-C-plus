@@ -140,3 +140,7 @@ ro.longcheer.sku=EMEA
 ro.longcheer.simsum=2
 ro.longcheer.thermal=1
 ro.boot.opt_eccci_c2k=0
+
+# Camera
+media.stagefright.legacyencoder=true
+media.stagefright.less-secure=true

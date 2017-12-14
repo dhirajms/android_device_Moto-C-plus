@@ -75,6 +75,7 @@ MTK_GPU_VERSION := mali midgard r7p0
 BOARD_USES_MTK_HARDWARE := true
 
 # Camera
+TARGET_HAS_LEGACY_CAMERA_HAL1 := true
 USE_CAMERA_STUB := true
 
 # Boot animation
