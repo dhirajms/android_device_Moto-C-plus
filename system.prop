@@ -22,11 +22,11 @@ ro.opengles.version=196609
 # USB MTP WHQL
 ro.sys.usb.mtp.whql.enable=0
 
-#
-ro.build.user=DhirajMS
-
 # Power off opt in IPO
 sys.ipo.pwrdncap=2
+
+# Tethering
+net.tethering.noprovisioning=true
 
 ro.sys.usb.storage.type=mtp,adb
 ro.vold.umsdirtyratio=20
@@ -140,7 +140,7 @@ ro.longcheer.sku=EMEA
 ro.longcheer.simsum=2
 ro.longcheer.thermal=1
 ro.boot.opt_eccci_c2k=0
-ro.telephony.default_network=9
+ro.telephony.default_network=20,20
 
 # Camera
 media.stagefright.legacyencoder=true

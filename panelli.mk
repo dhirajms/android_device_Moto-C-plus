@@ -102,7 +102,12 @@ PRODUCT_PACKAGES += \
     wpa_supplicant \
     wpa_supplicant.conf \
     lib_driver_cmd_mt66xx
-     
+
+PRODUCT_COPY_FILES += \
+    device/moto/panelli/configs/hostapd/hostapd.accept:system/etc/hostapd/hostapd.accept \
+    device/moto/panelli/configs/hostapd/hostapd_default.conf:system/etc/hostapd/hostapd_default.conf \
+    device/moto/panelli/configs/hostapd/hostapd.deny:system/etc/hostapd/hostapd.deny
+
 PRODUCT_PACKAGES += \
     librs_jni \
     com.android.future.usb.accessory
@@ -157,14 +162,21 @@ PRODUCT_PROPERTY_OVERRIDES += \
 # Media
 PRODUCT_PROPERTY_OVERRIDES += \
     media.stagefright.legacyencoder=0
- 
+
+# Display calibration
+PRODUCT_PACKAGES += \
+    libjni_livedisplay
+
 # RIL
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.kernel.android.checkjni=0
 
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
 	persist.sys.usb.config=mtp
+#user
 
+PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
+        ro.build.user=DhirajMS
 # Keyhandler package
 PRODUCT_PACKAGES += \
     com.cyanogenmod.keyhandler
