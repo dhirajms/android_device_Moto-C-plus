@@ -1,4 +1,4 @@
-fDEVICE_PATH := device/moto/panelli
+DEVICE_PATH := device/moto/panelli
 VENDOR_PATH := vendor/moto/panelli
 
 # inherit from the proprietary version
@@ -25,7 +25,7 @@ BOARD_KERNEL_CMDLINE := bootopt=64S3,32N2,32N2 androidboot.selinux=permissive
 BOARD_KERNEL_BASE := 0x40000000
 BOARD_KERNEL_PAGESIZE := 2048
 TARGET_KERNEL_SOURCE := kernel/moto/panelli
-TARGET_KERNEL_CONFIG := lineageos_panelli_defconfig
+TARGET_KERNEL_CONFIG := A158_defconfig
 BOARD_KERNEL_IMAGE_NAME := zImage-dtb
 KERNEL_TOOLCHAIN := $(ANDROID_BUILD_TOP)/prebuilts/gcc/$(HOST_OS)-x86/arm/arm-eabi-4.8/bin
 KERNEL_TOOLCHAIN_PREFIX := arm-eabi-
@@ -44,7 +44,8 @@ TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_SPARSE_EXT_DISABLED := false
 
 # Assert
-TARGET_OTA_ASSERT_DEVICE := panelli,"panelli",pannel_23_d
+#for ported recovery
+TARGET_OTA_ASSERT_DEVICE := panelli,"panelli",pannel_23_d,namnath
 
 # Disable memcpy opt (for audio libraries)
 TARGET_CPU_MEMCPY_OPT_DISABLE := true
