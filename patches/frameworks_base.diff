@@ -1,0 +1,249 @@
+diff --git a/core/jni/android_media_AudioSystem.cpp b/core/jni/android_media_AudioSystem.cpp
+index 4976002..f690ed3 100644
+--- a/core/jni/android_media_AudioSystem.cpp
++++ b/core/jni/android_media_AudioSystem.cpp
+@@ -1743,7 +1743,136 @@ android_media_AudioSystem_systemReady(JNIEnv *env, jobject thiz)
+     return nativeToJavaStatus(AudioSystem::systemReady());
+ }
+ 
++// zormax add
++static int
++android_media_AudioSystem_GetAudioData(JNIEnv *env, jobject thiz,jint par ,jint len,jbyteArray javaEmParamter)
++{
++    int index = 0;
++    char buffer[len] ;
++    // get the pointer for the audio data from the java array
++    jbyte* AudioCustomVolumeParameter = NULL;
++    memset(buffer, 0, len);
++    if (javaEmParamter) {
++        AudioCustomVolumeParameter = (jbyte *)env->GetByteArrayElements(javaEmParamter, NULL);
++        if (AudioCustomVolumeParameter == NULL) {
++            ALOGE("Error retrieving source of EM paramters");
++            return -2; // out of memory or no data to load
++        }
++    } else {
++        ALOGE("NULL java array of audio data to play, can't play");
++        return -2;
++    }
++    if(AudioSystem::GetAudioData(par,len,(void *)buffer) != NO_ERROR ){
++        index =-1;
++    }
++    env->SetByteArrayRegion(javaEmParamter, 0, len, (const signed char*) buffer);
++    env->ReleaseByteArrayElements(javaEmParamter, AudioCustomVolumeParameter, JNI_ABORT);
++    return index;
++}
++
++static int
++android_media_AudioSystem_SetEMParameter(JNIEnv *env, jobject thiz, jbyteArray javaEmParamter, jint len)
++{
++    int index = 0;
++    // get the pointer for the audio data from the java array
++    jbyte* EMParameter = NULL;
++    if (javaEmParamter) {
++        EMParameter = (jbyte *)env->GetByteArrayElements(javaEmParamter, NULL);
++        if (EMParameter == NULL) {
++            ALOGE("Error retrieving source of EM paramters");
++            return -2; // out of memory or no data to load
++        }
++    } else {
++        ALOGE("NULL java array of audio data to play, can't play");
++        return -2;
++    }
++    if(AudioSystem::SetEMParameter ((void *)EMParameter, len) != NO_ERROR ){
++        index =-1;
++    }
++
++    env->ReleaseByteArrayElements(javaEmParamter, EMParameter, JNI_ABORT);
++
++    return index;
++}
++
++static int
++android_media_AudioSystem_SetAudioData(JNIEnv *env, jobject thiz, jint par,jint len, jbyteArray javaEmParamter)
++{
++    int index = 0;
++    // get the pointer for the audio data from the java array
++    jbyte* AudioCustomVolumeParameter = NULL;
++    if (javaEmParamter) {
++        AudioCustomVolumeParameter = (jbyte *)env->GetByteArrayElements(javaEmParamter, NULL);
++        if (AudioCustomVolumeParameter == NULL) {
++            ALOGE("Error retrieving source of  AudioCustomVolumeParameter");
++            return -2; // out of memory or no data to load
++        }
++    } else {
++        ALOGE("NULL java array of audio data to play, can't play");
++        return -2;
++    }
++    if(AudioSystem::SetAudioData (par,len,(void *)AudioCustomVolumeParameter) != NO_ERROR ){
++        index =-1;
++    }
++    env->ReleaseByteArrayElements(javaEmParamter, AudioCustomVolumeParameter, JNI_ABORT);
++    return index;
++}
+ 
++
++static int
++android_media_AudioSystem_SetAudioCommandX(JNIEnv *env, jobject thiz, jint para1, jint para2)
++{
++    int ret = 0;
++    if(PERMISSION_DENIED == (ret = AudioSystem::SetAudioCommand(para1, para2)))
++        {
++            return -1;
++        }
++        else
++            {
++                return ret;
++            }
++
++}
++
++static int
++android_media_AudioSystem_GetAudioCommandX(JNIEnv *env, jobject thiz, jint para1)
++{
++    int ret = -1;
++    if(NO_ERROR != AudioSystem::GetAudioCommand(para1, &ret))
++    {
++        return -1;
++    }
++    return ret;
++}
++
++static int
++android_media_AudioSystem_GetEMParameter(JNIEnv *env, jobject thiz, jbyteArray javaEmParamter, jint len)
++{
++    int index = 0;
++    // get the pointer for the audio data from the java array
++    jbyte* EMParameter = NULL;
++    char buffer[len] ;
++    if (javaEmParamter) {
++        EMParameter = (jbyte *)env->GetByteArrayElements(javaEmParamter, NULL);
++        if (EMParameter == NULL) {
++            ALOGE("Error retrieving source of EM paramters");
++            return -2; // out of memory or no data to load
++        }
++    } else {
++        ALOGE("NULL java array of audio data to play, can't play");
++        return -2;
++    }
++    if(AudioSystem::GetEMParameter ((void *)buffer, len) != NO_ERROR ){
++        index =-1;
++    }
++
++    env->SetByteArrayRegion(javaEmParamter, 0, len, (const signed char*) buffer);
++    env->ReleaseByteArrayElements(javaEmParamter, EMParameter, JNI_ABORT);
++
++    return index;
++}
++
++// zormax add end
+ // ----------------------------------------------------------------------------
+ 
+ static const JNINativeMethod gMethods[] = {
+@@ -1775,6 +1904,13 @@ static const JNINativeMethod gMethods[] = {
+     {"getOutputLatency",    "(I)I",     (void *)android_media_AudioSystem_getOutputLatency},
+     {"setLowRamDevice",     "(Z)I",     (void *)android_media_AudioSystem_setLowRamDevice},
+     {"checkAudioFlinger",    "()I",     (void *)android_media_AudioSystem_checkAudioFlinger},
++    // add zormax, for em mode setting
++    {"setEmParameter",   "([BI)I",     (void *)android_media_AudioSystem_SetEMParameter},
++    {"getEmParameter",   "([BI)I",     (void *)android_media_AudioSystem_GetEMParameter},
++    {"setAudioCommand",   "(II)I",     (void *)android_media_AudioSystem_SetAudioCommandX},
++    {"getAudioCommand",   "(I)I",     (void *)android_media_AudioSystem_GetAudioCommandX},
++    {"setAudioData",            "(II[B)I",     (void *)android_media_AudioSystem_SetAudioData},
++    {"getAudioData",            "(II[B)I",     (void *)android_media_AudioSystem_GetAudioData},
+     {"listAudioPorts",      "(Ljava/util/ArrayList;[I)I",
+                                                 (void *)android_media_AudioSystem_listAudioPorts},
+     {"createAudioPatch",    "([Landroid/media/AudioPatch;[Landroid/media/AudioPortConfig;[Landroid/media/AudioPortConfig;)I",
+@@ -1947,4 +2083,4 @@ int register_android_media_AudioSystem(JNIEnv *env)
+     RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
+     return RegisterMethodsOrDie(env, kEventHandlerClassPathName, gEventHandlerMethods,
+                                 NELEM(gEventHandlerMethods));
+-}
++}
+\ No newline at end of file
+diff --git a/core/jni/fd_utils-inl.h b/core/jni/fd_utils-inl.h
+index a68a602..4587544 100644
+--- a/core/jni/fd_utils-inl.h
++++ b/core/jni/fd_utils-inl.h
+@@ -306,7 +306,7 @@ class FileDescriptorInfo {
+       return true;
+     }
+ 
+-    return false;
++    return true;
+   }
+ 
+   // TODO: Call android::base::Readlink instead of copying the code here.
+@@ -587,4 +587,4 @@ class FileDescriptorTable {
+   std::unordered_map<int, FileDescriptorInfo*> open_fd_map_;
+ 
+   DISALLOW_COPY_AND_ASSIGN(FileDescriptorTable);
+-};
++};
+\ No newline at end of file
+diff --git a/media/java/android/media/AudioSystem.java b/media/java/android/media/AudioSystem.java
+index e08c290..dd3ac5a 100644
+--- a/media/java/android/media/AudioSystem.java
++++ b/media/java/android/media/AudioSystem.java
+@@ -823,5 +823,60 @@ public class AudioSystem
+      * Keep in sync with core/jni/android_media_DeviceCallback.h.
+      */
+     final static int NATIVE_EVENT_ROUTING_CHANGE = 1000;
+-}
+ 
++    /// zormax: Add for support EM
++    /**
++     * Set EM parameter.
++     *
++     * @param ptr The data to be set.
++     * @param length The data size.
++     * @return The status.
++     */
++    public static native int setEmParameter(byte[] ptr, int length);
++
++    /**
++     * Get EM parameter.
++     *
++     * @param ptr The data to be get.
++     * @param length The data size.
++     * @return The status.
++     */
++    public static native int getEmParameter(byte[] ptr, int length);
++
++    /**
++     * Set audio command.
++     *
++     * @param arg1 The first argument.
++     * @param arg2 The second argument.
++     * @return The status.
++     */
++    public static native int setAudioCommand(int arg1, int arg2);
++
++    /**
++     * Get audio command.
++     *
++     * @param arg1 The first argument.
++     * @return The status.
++     */
++    public static native int getAudioCommand(int arg1);
++
++    /**
++     * Set audio data.
++     *
++     * @param par1 The par1.
++     * @param len The length.
++     * @param ptr The array of audio data.
++     * @return The status.
++     */
++    public static native int setAudioData(int par1, int len, byte[] ptr);
++
++    /**
++     * Get audio data.
++     *
++     * @param par1 The par1.
++     * @param len The length of data..
++     * @param ptr The array to receive audio data.
++     * @return The status.
++     */
++    public static native int getAudioData(int par1, int len, byte[] ptr);
++}
+\ No newline at end of file
