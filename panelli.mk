@@ -1,5 +1,3 @@
-LOCAL_PATH := device/motorola/nicklaus
-
 $(call inherit-product, $(SRC_TARGET_DIR)/product/languages_full.mk)
 $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
 
@@ -7,7 +5,7 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/full_base_telephony.mk)
 $(call inherit-product, device/common/gps/gps_us_supl.mk)
 
 # Vendor Blobs
-$(call inherit-product, vendor/motorola/nicklaus/nicklaus-vendor.mk)
+$(call inherit-product, vendor/moto/panelli/panelli-vendor.mk)
 
 DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay
 
@@ -113,6 +111,8 @@ ro.mtk_lte_support=1 \
 ro.telephony.sim.count=2 \
 persist.gemini.sim_num=2 \
 ril.current.share_modem=2 \
+ro.telephony.ril_class=PanelliRIL \
+ro.telephony.ril.config=fakeiccid \
 ro.mtk_gps_support=1 \
 ro.mtk_agps_app=1 \
 persist.sys.display.clearMotion=0	
@@ -121,11 +121,10 @@ persist.sys.display.clearMotion=0
 
 PRODUCT_BUILD_PROP_OVERRIDES += BUILD_UTC_DATE=0
 PRODUCT_BUILD_PROP_OVERRIDES += BUILD_UTC_DATE=0
-PRODUCT_NAME := full_nicklaus
-PRODUCT_DEVICE := nicklaus
+PRODUCT_NAME := full_panelli
+PRODUCT_DEVICE := panelli
 PRODUCT_LOCALES := en_US ru_RU
 TARGET_SCREEN_HEIGHT := 1280
 TARGET_SCREEN_WIDTH := 720
 
 $(call inherit-product, frameworks/native/build/phone-xhdpi-2048-dalvik-heap.mk)
-
