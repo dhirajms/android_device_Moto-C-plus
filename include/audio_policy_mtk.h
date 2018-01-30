@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The CyanogenMod Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-#define PATH_WHITELIST_EXTRA_H \
-    "/proc/ged",
 
-// Overload this file in your device specific config if you need
-// to add extra whitelisted paths.
-// WARNING: Only use this if necessary. Custom inits should be
-// checked for leaked file descriptors before even considering
-// this.
-// In order to add your files, copy the whole file (don't forget the copyright notice!),
-// uncomment the #define above and change the paths inside to match your requirements
+#ifndef AUDIO_POLICY_INTERFACE_MTK_H
+#define AUDIO_POLICY_INTERFACE_MTK_H
 
- 
+#include <hardware/audio_policy.h>
+
+struct audio_policy_mtk: audio_policy{
+//    struct audio_policy legacy_audio_policy;
+    int (*set_policy_parameters)(struct audio_policy *pol, int par1, int par2, int par3, int par4);
+
+};
+
+#endif  // AUDIO_POLICY_INTERFACE_MTK_H
