@@ -36,9 +36,5 @@ allow teei_daemon kmsg_device:chr_file {open write};
 #define for mlsconstrain
 typeattribute teei_client_device mlstrustedobject;
 
-#allow teei_daemon save fingerprint data
-allow teei_daemon fingerprintd_data_file:dir { search write add_name };
-allow teei_daemon fingerprintd_data_file:file { create read write open };
-
 #allow teei_daemon read ut_keymaster data
 allow teei_daemon ut_keymaster_device:chr_file rw_file_perms;

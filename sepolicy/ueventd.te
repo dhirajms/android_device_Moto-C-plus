@@ -15,8 +15,5 @@ allow ueventd platform_app_tmpfs:file write;
 #add for sysfs:md32
 allow ueventd sysfs_md32:file { write open };
 
-# add for fingerprint ET3XX
-allow ueventd etsd_data_file:chr_file { create setattr read write ioctl open };
-
 #add for sysfs:scp
 allow ueventd sysfs_scp:file { write open };

@@ -129,14 +129,6 @@ allow untrusted_app program_binary_service:service_manager find;
 allow untrusted_app embms_library_file:dir {search getattr};
 allow untrusted_app embms_library_file:file {read getattr open};
 
-# Date : 2015/12/9
-# Operation : Migration
-# Purpose : Added by xiehaifei for Fingerprint ET320 esfp0 Demo APK
-allow untrusted_app esfp0_device:chr_file rw_file_perms;
-#allow untrusted_app esfp0_device:chr_file {getattr open read write ioctl};
-allow untrusted_app etsd_service:service_manager find;
-allow untrusted_app etsd:binder {call transfer};
-
 # Date: 2016/5/16
 # Operator: New feature for eMBMS middleware integration
 # Purpose: allow vendor's eMBMS middleware APK to send AT-command via embmsd local socket

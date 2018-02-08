@@ -237,6 +237,3 @@ type ut_keymaster_device, dev_type;
 type dri_device, dev_type, mlstrustedobject;
 type hotknot_device, dev_type;
 type irrx_device, dev_type;
-
-# Fingerprint device
-type esfp0_device, dev_type, mlstrustedobject;

@@ -31,6 +31,3 @@ allow domain exm0_device:chr_file rw_file_perms;
 allow domain log_device:dir search;
 allow domain log_device:chr_file w_file_perms;
 allow domain storage_file:dir search;
-
-# Fingerprint device
-allow domain esfp0_device:chr_file rw_file_perms;

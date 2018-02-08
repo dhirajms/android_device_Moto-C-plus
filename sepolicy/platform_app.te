@@ -275,13 +275,3 @@ unix_socket_connect(platform_app, rild_embms, rilproxy)
 # Purpose: comply with Vzw eMBMS operator requirement
 allow platform_app embms_library_file:file create_file_perms;
 allow platform_app embms_library_file:dir rw_dir_perms;
-
-# Date : 2015/12/9
-# Operation : Migration
-# Purpose : Added by xiehaifei for Fingerprint ET320 esfp0 device
-# Package: com.android.systemui
-allow platform_app esfp0_device:chr_file rw_file_perms;
-#allow platform_app self:netlink_kobject_uevent_socket { create_socket_perms };
-allow platform_app esfp0_device:chr_file rw_file_perms;
-allow platform_app etsd_service:service_manager find;
-allow platform_app etsd:binder { call transfer };

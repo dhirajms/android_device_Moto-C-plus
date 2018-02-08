@@ -38,9 +38,6 @@ type mtk_data_shaping_service, app_api_service, system_server_service, service_m
 type mtk_running_booster_service, app_api_service, system_server_service, service_manager_type;
 type mtk_test_ampolicymaker_service, app_api_service, system_server_service, service_manager_type;
 
-# add for fingerprint ET3XX
-type etsd_service,                  service_manager_type;
-
 # Other Services
 type mtk_crossmount_service, service_manager_type;
 type mtk_hotknot_service, service_manager_type;
@@ -52,3 +49,4 @@ type terservice_service, service_manager_type;
 type vtservice_service, service_manager_type;
 type vie_command_service, service_manager_type;
 type mtk_usp_service, app_api_service, system_server_service, service_manager_type;
+
