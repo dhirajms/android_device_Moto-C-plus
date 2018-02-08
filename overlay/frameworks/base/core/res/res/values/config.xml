@@ -223,7 +223,7 @@
             64 - Volume rocker
          For example, a device with Home, Back and Menu keys would set this
          config to 7. -->
-    <!-- <integer name="config_deviceHardwareWakeKeys">79</integer> -->
+    <integer name="config_deviceHardwareWakeKeys">79</integer>
 
     
     <!-- Performance profiles -->
@@ -253,39 +253,18 @@
     
     <!-- Is the device capable of hot swapping an UICC Card -->
     <bool name="config_hotswapCapable">true</bool>
-	
-    <!-- Flag indicating emergency calls will always use IMS irrespective of the state of
-    the IMS connection -->
-    <!-- <bool name="useImsAlwaysForEmergencyCall">false</bool> -->
-
-    <!-- Flag indicating whether the IMS service can be turned off. If false then
-        the service will not be turned-off completely (the ImsManager.turnOffIms() will
-        be disabled) but individual Features can be disabled using ImsConfig.setFeatureValue() -->
-    <!-- <bool name="imsServiceAllowTurnOff">true</bool> -->
-
-    <!-- Flag specifying whether VoLTE is available on device -->
-    <!-- <bool name="config_device_volte_available">false</bool> -->
-
-    <!-- Flag specifying whether VT is available on device -->
-    <!-- <bool name="config_device_vt_available">false</bool> -->
-    
-	<!-- The RadioAccessFamilies supported by the device.
-         Empty is viewed as "all".  Only used on devices which
-         don't support RIL_REQUEST_GET_RADIO_CAPABILITY
-         format is UMTS|LTE|... -->
-    <string translatable="false" name="config_radio_access_family">LTE | GSM | WCDMA</string>
     
     <!-- Whether to use TMO LTE singnal strength threshold -->
-    <!-- <bool name="config_regional_lte_singnal_threshold">true</bool> -->
+    <bool name="config_regional_lte_singnal_threshold">true</bool>
     
-    <!-- <integer-array name="lte_signal_strength_threshold">
+    <integer-array name="lte_signal_strength_threshold">
         <item>-140</item>
         <item>-125</item>
         <item>-120</item>
         <item>-115</item>
         <item>-105</item>
         <item>-44</item>
-    </integer-array> -->     
+    </integer-array>      
 
     <!-- Boolean indicating if current platform supports BLE peripheral mode -->
     <bool name="config_bluetooth_le_peripheral_mode_supported">false</bool>

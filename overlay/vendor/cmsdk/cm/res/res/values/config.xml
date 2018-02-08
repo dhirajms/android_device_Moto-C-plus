@@ -17,8 +17,6 @@
 <resources>
   
     <!-- For high brightness mode -->
-    <!-- <integer name="config_outdoorAmbientLux">20000</integer> -->
-    <integer name="config_defaultLiveDisplayMode">0</integer>
     <bool name="config_defaultAutoContrast">false</bool>
     <!-- <bool name="config_defaultAutoOutdoorMode">false</bool> -->
     <!-- <bool name="config_defaultColorEnhancement">false</bool> -->
