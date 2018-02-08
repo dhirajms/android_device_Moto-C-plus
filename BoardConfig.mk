@@ -50,7 +50,7 @@ BOARD_TAGS_OFFSET := 0xE000000
 ifeq ($(FORCE_32_BIT),true)
 ARCH := arm
 TARGET_KERNEL_ARCH := arm
-TARGET_KERNEL_CONFIG := A158_defconfig
+TARGET_KERNEL_CONFIG := A158_debug_defconfig
 BOARD_KERNEL_CMDLINE := bootopt=64S3,32N2,32N2 androidboot.selinux=permissive androidboot.selinux=disabled
 BOARD_KERNEL_OFFSET := 0x00008000
 else
