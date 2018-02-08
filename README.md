@@ -3,4 +3,16 @@
 ##The Moto C Plus (codenamed _"panelli"_)
 
 ### Thanks to: 
-@SamarV-121
+my Bois..
+
+Working..
+ Wifi
+ Sound
+ Ril
+ Radio
+ Bluetooth
+ Hotspot
+ 
+ Not working..
+ Camera, flashlight, Prox
+ 
