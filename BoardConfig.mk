@@ -57,7 +57,7 @@ BOARD_GLOBAL_CFLAGS += -DNO_SECURE_DISCARD
 BOARD_GLOBAL_CFLAGS += -DDISABLE_HW_ID_MATCH_CHECK
 
 # Graphics
-BOARD_EGL_CFG := /vendor/moto/panelli/proprietary/vendor/lib/egl/egl.cfg
+BOARD_EGL_CFG := /vendor/moto/panelli/vendor/lib/egl/egl.cfg
 BOARD_EGL_WORKAROUND_BUG_10194508 := true
 USE_OPENGL_RENDERER := true
 NUM_FRAMEBUFFER_SURFACE_BUFFERS := 3
