@@ -1,24 +1,11 @@
-/system       ext4          /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/system ext4 ro wait
-/data         ext4          /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/userdata rw,discard,nosuid,nodev,noatime,nodiratime,nobarrier,inline_xattr,inline_data wait,check,formattable,encryptable=/dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/metadata
-/cache        ext4          /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/cache noatime,nosuid,nodev,noauto_da_alloc,discard wait,check
-/protect_f    ext4          /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/protect1 noatime,nosuid,nodev,noauto_da_alloc,commit=1,nodelalloc wait,check,formattable
-/protect_s    ext4          /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/protect2 noatime,nosuid,nodev,noauto_da_alloc,commit=1,nodelalloc wait,check,formattable
-/nvdata       ext4          /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/nvdata noatime,nosuid,nodev,noauto_da_alloc,discard wait,check,formattable
-/oem          ext4          /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/oem ro wait
-/persist      ext4          /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/persist noatime,nosuid,nodev,noauto_da_alloc,commit=1,nodelalloc wait,check,formattable
-/persistent   emmc          /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/frp defaults defaults
-/nvram        emmc          /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/nvram defaults defaults
-/proinfo      emmc          /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/proinfo defaults defaults
-/bootloader   emmc          /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/lk defaults defaults
-/misc         emmc          /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/para defaults defaults
-/boot         emmc          /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/boot defaults defaults
-/recovery     emmc          /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/recovery defaults defaults
-/logo         emmc          /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/logo defaults defaults
-/expdb        emmc          /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/expdb defaults defaults
-/secro        emmc          /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/secro defaults defaults
-/seccfg       emmc          /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/seccfg defaults defaults
-/tee1         emmc          /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/tee1 defaults defaults
-/tee2         emmc          /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/tee2 defaults defaults
-/external_sd       vfat          /dev/block/mmcblk1p1 /dev/block/mmcblk1 flags=display="MicroSD Card";storage;wipeingui;removable
-/usb_otg      auto           /dev/block/sda1 /dev/block/sda  flags=display="USB-OTG";storage;wipeingui;removable
-
+#Mount point  device  fs  flags
+/dev/misc		/misc		emmc	defaults defaults
+/dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/userdata	/data		ext4	noatime,nosuid,nodev,barrier=1,data=ordered,nomblk_io_submit,noauto_da_alloc,errors=panic wait,check,encryptable=/dev/block/platform/msm_sdcc.1/by-name/metadata
+/dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/system	/system		ext4	ro,barrier=1                                                    wait
+/dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/cache	/cache		ext4	noatime,nosuid,nodev,barrier=1,data=ordered,nomblk_io_submit,noauto_da_alloc,errors=panic wait,check
+/dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/boot		/boot		emmc	defaults defaults
+/dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/recovery		/recovery	emmc	defaults defaults
+# For mounting Internal and SD Card in recovery
+/dev/block/mmcblk1	/sdcard		vfat	defaults defaults
+/dev/block/mmcblk1p1	/sdcard		vfat	defaults defaults
+/dev/block/mmcblk1p2	/sd-ext		auto	defaults defaults
