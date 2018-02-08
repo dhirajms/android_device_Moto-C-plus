@@ -5,14 +5,11 @@
 ### Thanks to: 
 my Bois..
 
-Working..
- Wifi
- Sound
- Ril
- Radio
- Bluetooth
- Hotspot
+#Working..
+##Wifi,Sound,Ril,Radio,Bluetooth,Hotspot.
  
- Not working..
- Camera, flashlight, Prox
+ #Not working..
+ ##Camera, flashlight, Prox
+ 
+ *YOU WILL FOUND KANGS HERE*
  
