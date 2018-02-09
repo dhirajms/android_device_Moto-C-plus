@@ -6,10 +6,10 @@
 my Bois..
 
 #Working..
-##Wifi,Sound,Ril,Radio,Bluetooth,Hotspot.
+##Wifi,Sound,Ril,Radio,Bluetooth,Hotspot,Camera, flashlight
  
  #Not working..
- ##Camera, flashlight, Prox
+ ##Camcorder, Prox
  
  *YOU WILL FOUND KANGS HERE*
  
