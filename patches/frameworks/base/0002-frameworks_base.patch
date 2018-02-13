@@ -1,3 +1,15 @@
+From 601a467af0d0be956a19f99fbd8f09de8305d425 Mon Sep 17 00:00:00 2001
+From: darklord4822 <darklord4722@gmail.com>
+Date: Sat, 7 Oct 2017 12:05:37 +0000
+Subject: [PATCH] changes for MTK
+
+Change-Id: If41f15b39e2e63d0c4c7b4713b281c022c499632
+---
+ core/jni/android_media_AudioSystem.cpp    | 138 +++++++++++++++++++++++++++++-
+ core/jni/fd_utils-inl.h                   |   4 +-
+ media/java/android/media/AudioSystem.java |  57 +++++++++++-
+ 3 files changed, 195 insertions(+), 4 deletions(-)
+
 diff --git a/core/jni/android_media_AudioSystem.cpp b/core/jni/android_media_AudioSystem.cpp
 index 4976002..f690ed3 100644
 --- a/core/jni/android_media_AudioSystem.cpp
@@ -247,3 +259,6 @@ index e08c290..dd3ac5a 100644
 +    public static native int getAudioData(int par1, int len, byte[] ptr);
 +}
 \ No newline at end of file
+-- 
+1.9.1
+

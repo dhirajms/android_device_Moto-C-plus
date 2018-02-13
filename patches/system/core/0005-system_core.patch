@@ -1,3 +1,23 @@
+From 7603e05f11d22216701b0584fc534eb1a8b15918 Mon Sep 17 00:00:00 2001
+From: Mysteryagr <ahmedrahmy842@gmail.com>
+Date: Thu, 21 Dec 2017 16:21:46 +0000
+Subject: [PATCH] 0005-system_core.patch
+
+Change-Id: Iae28637be8a0943c3b00b2d1629927f6c5e5e56e
+---
+ include/netutils/ifc.h      |  15 ++
+ init/init.cpp               |   4 +-
+ init/init.h                 |   2 +-
+ init/service.cpp            |   6 +-
+ libcutils/Android.mk        |   5 +-
+ libcutils/fs_config.c       |   2 +-
+ libcutils/mtk_audioCompat.c |   4 +
+ libcutils/mtk_xlog.cpp      |  27 ++++
+ libnetutils/ifc_utils.c     | 323 ++++++++++++++++++++++++++++++++++++++++++++
+ 9 files changed, 380 insertions(+), 8 deletions(-)
+ create mode 100644 libcutils/mtk_audioCompat.c
+ create mode 100644 libcutils/mtk_xlog.cpp
+
 diff --git a/include/netutils/ifc.h b/include/netutils/ifc.h
 index 3b27234..03932ab 100644
 --- a/include/netutils/ifc.h
@@ -10,7 +30,7 @@ index 3b27234..03932ab 100644
 +extern int ifc_is_up(const char *name, unsigned *isup);
 +extern int ifc_enable_allmc(const char *name);
 +extern int ifc_disable_allmc(const char *name);
-+extern int ifc_reset_connection_by_uid(int uid, int error); 
++extern int ifc_reset_connection_by_uid(int uid, int error);
 +extern int ifc_set_throttle(const char *ifname, int rxKbps, int txKbps);
 +extern int ifc_set_fwmark_rule(const char *ifname, int mark, int add);
 +extern int ifc_set_txq_state(const char *ifname, int state);
@@ -25,7 +45,7 @@ index 3b27234..03932ab 100644
  
  #endif /* _NETUTILS_IFC_H_ */
 diff --git a/init/init.cpp b/init/init.cpp
-index 7a37059..f0b0d4f 100755
+index 7a37059..ec1e524 100755
 --- a/init/init.cpp
 +++ b/init/init.cpp
 @@ -85,7 +85,7 @@ int have_console;
@@ -37,6 +57,15 @@ index 7a37059..f0b0d4f 100755
  
  bool waiting_for_exec = false;
  
+@@ -366,7 +366,7 @@ static void export_kernel_boot_props() {
+         { "ro.boot.mode",       "ro.bootmode",   "unknown", },
+         { "ro.boot.baseband",   "ro.baseband",   "unknown", },
+         { "ro.boot.bootloader", "ro.bootloader", "unknown", },
+-        { "ro.boot.hardware",   "ro.hardware",   "unknown", },
++        { "ro.boot.hardware",   "ro.hardware",   "mt6735", },
+ #ifndef IGNORE_RO_BOOT_REVISION
+         { "ro.boot.revision",   "ro.revision",   "0", },
+ #endif
 diff --git a/init/init.h b/init/init.h
 index 345d442..f93d0c5 100644
 --- a/init/init.h
@@ -67,6 +96,29 @@ index 8127e70..6be06db 100644
          }
          free(mycon);
          free(fcon);
+diff --git a/libcutils/Android.mk b/libcutils/Android.mk
+index 7a92253..c080b2d 100644
+--- a/libcutils/Android.mk
++++ b/libcutils/Android.mk
+@@ -102,6 +102,8 @@ LOCAL_SRC_FILES := $(libcutils_common_sources) \
+         qtaguid.c \
+         trace-dev.c \
+         uevent.c \
++        mtk_xlog.cpp \
++        mtk_audioCompat.c
+ 
+ LOCAL_SRC_FILES_arm += arch-arm/memset32.S
+ LOCAL_SRC_FILES_arm64 += arch-arm64/android_memset.S
+@@ -133,7 +135,8 @@ endif
+ ifneq ($(ENABLE_SCHEDBOOST),)
+ LOCAL_CFLAGS += -DUSE_SCHEDBOOST
+ endif
+-LOCAL_CFLAGS += -Werror -Wall -Wextra -std=gnu90
++#LOCAL_CFLAGS += -Werror -Wall -Wextra -std=gnu90
++LOCAL_CFLAGS += -Wall -Wextra -std=gnu90
+ LOCAL_CLANG := true
+ LOCAL_SANITIZE := integer
+ include $(BUILD_STATIC_LIBRARY)
 diff --git a/libcutils/fs_config.c b/libcutils/fs_config.c
 index 68cfcbe..3c01c79 100644
 --- a/libcutils/fs_config.c
@@ -80,6 +132,49 @@ index 68cfcbe..3c01c79 100644
  
      { 00750, AID_ROOT,      AID_ROOT,      0, "system/bin/uncrypt" },
      { 00750, AID_ROOT,      AID_ROOT,      0, "system/bin/install-recovery.sh" },
+diff --git a/libcutils/mtk_audioCompat.c b/libcutils/mtk_audioCompat.c
+new file mode 100644
+index 0000000..7b00e64
+--- /dev/null
++++ b/libcutils/mtk_audioCompat.c
+@@ -0,0 +1,4 @@
++int get_capture_position(void)
++{
++    return 0;
++}
+diff --git a/libcutils/mtk_xlog.cpp b/libcutils/mtk_xlog.cpp
+new file mode 100644
+index 0000000..48abe31
+--- /dev/null
++++ b/libcutils/mtk_xlog.cpp
+@@ -0,0 +1,27 @@
++#include <cutils/log.h>
++
++extern "C" {
++	struct xlog_record {
++		const char *tag_str;
++		const char *fmt_str;
++		int prio;
++	};
++
++	static void init(void) __attribute__ ((constructor));
++
++	void init(void){}
++
++	int __xlog_buf_printf(int bufid, const struct xlog_record *rec, ...)
++	{
++	  va_list args;
++	  va_start(args, rec);
++	  LOG_PRI_VA(rec->prio, rec->tag_str, rec->fmt_str, args);
++	  va_end(args);
++
++	  return 0;
++	}
++
++	void dl_unregister_notify_function(void){}
++
++	void dl_register_notify_function(int (*load_notify_function) (const char *name, uintptr_t address, uintptr_t size), int(*unload_notify_function) (const char *name, uintptr_t address)){}
++}
 diff --git a/libnetutils/ifc_utils.c b/libnetutils/ifc_utils.c
 index 7739cf4..72832aa 100644
 --- a/libnetutils/ifc_utils.c
@@ -425,3 +520,6 @@ index 7739cf4..72832aa 100644
 +
 +
 +#endif
+-- 
+2.7.4
+
