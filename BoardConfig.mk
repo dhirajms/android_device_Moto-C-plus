@@ -36,6 +36,10 @@ BOARD_KERNEL_CMDLINE := bootopt=64S3,32N2,32N2 androidboot.selinux=permissive an
 BOARD_KERNEL_OFFSET := 0x00008000
 BOARD_MKBOOTIMG_ARGS := --kernel_offset $(BOARD_KERNEL_OFFSET) --ramdisk_offset $(BOARD_RAMDISK_OFFSET) --tags_offset $(BOARD_TAGS_OFFSET)
 
+#GCC
+KERNEL_TOOLCHAIN := $(ANDROID_BUILD_TOP)/prebuilts/gcc/$(HOST_OS)-x86/arm/arm-eabi-4.8/bin
+TARGET_KERNEL_CROSS_COMPILE_PREFIX := arm-eabi-
+
 # make_ext4fs requires numbers in dec format
 BOARD_BOOTIMAGE_PARTITION_SIZE := 16777216 
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 16777216 
