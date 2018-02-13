@@ -33,3 +33,6 @@ cd ../..
 cd frameworks/native
 patch -p1 < ../../device/moto/panelli/patches/frameworks_native.diff
 cd ../..
+cd external/wpa_supplicant_8
+patch -p1 < ../../device/moto/panelli/patches/external_nvram.patch
+cd ../..
