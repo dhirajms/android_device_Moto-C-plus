@@ -1,9 +1,9 @@
-From 0579448b7a188dd6666d4c3cb47c8be3f167bcf2 Mon Sep 17 00:00:00 2001
+From 6b0824fbc276098db8c98b905a56ba209a863a08 Mon Sep 17 00:00:00 2001
 From: darklord4822 <darklord4722@gmail.com>
-Date: Sat, 10 Feb 2018 22:55:31 +0000
+Date: Sat, 7 Oct 2017 13:13:26 +0000
 Subject: [PATCH] changes for MTK
 
-Change-Id: I105c019d026520bd02314da20ecbb7f15435e7a9
+Change-Id: Ie002e9a088f7448acbe73560335e4cd84df5978b
 ---
  include/gui/BufferQueueCore.h        |   3 +-
  include/gui/IProducerListener.h      |   6 ++
@@ -18,20 +18,17 @@ Change-Id: I105c019d026520bd02314da20ecbb7f15435e7a9
  libs/gui/ConsumerBase.cpp            |   9 +++
  libs/gui/GLConsumer.cpp              |   9 +++
  libs/gui/IProducerListener.cpp       |  10 ++-
- libs/gui/SurfaceControl.cpp          |  18 +++++
  libs/ui/Android.mk                   |  16 ++++-
  libs/ui/Fence.cpp                    |  33 ++++++++-
  libs/ui/GraphicBuffer.cpp            |  29 ++++++++
  libs/ui/mediatek/Fence.cpp           |  58 +++++++++++++++
  libs/ui/mediatek/IDumpTunnel.cpp     | 116 ++++++++++++++++++++++++++++++
  libs/ui/mediatek/RefBaseDump.cpp     |  70 ++++++++++++++++++
- opengl/include/EGL/eglext.h          |   9 +++
  opengl/libs/EGL/Loader.cpp           |  41 ++++++++---
  opengl/libs/EGL/Loader.h             |   8 +--
- opengl/libs/EGL/eglApi.cpp           |  75 ++++++++++++++++++++
- opengl/libs/EGL/egl_entries.in       |   3 +
+ opengl/libs/EGL/eglApi.cpp           |   8 +++
  vulkan/libvulkan/driver.cpp          |  18 +++--
- 26 files changed, 766 insertions(+), 29 deletions(-)
+ 23 files changed, 669 insertions(+), 29 deletions(-)
  create mode 100644 include/ui/mediatek/GuiExtMonitor.h
  create mode 100644 include/ui/mediatek/IDumpTunnel.h
  create mode 100644 include/ui/mediatek/RefBaseDump.h
@@ -419,7 +416,7 @@ index 0889aaf..718282d 100644
  	SurfaceControl.cpp \
  	SurfaceComposerClient.cpp \
  	SyncFeatures.cpp \
-+	
++
 +ifndef MTK_HARDWARE
 +LOCAL_SRC_FILES += \
 +	GraphicsEnv.cpp
@@ -601,35 +598,6 @@ index da54ce1..da5f65e 100644
 +#endif
  
  } // namespace android
-diff --git a/libs/gui/SurfaceControl.cpp b/libs/gui/SurfaceControl.cpp
-index d59b37c..df33860 100644
---- a/libs/gui/SurfaceControl.cpp
-+++ b/libs/gui/SurfaceControl.cpp
-@@ -132,6 +132,24 @@ status_t SurfaceControl::setBlurMaskAlphaThreshold(float alpha) {
-     return mClient->setBlurMaskAlphaThreshold(mHandle, alpha);
- }
- status_t SurfaceControl::setPosition(float x, float y) {
-+#ifdef MTK_HARDWARE
-+    const float ub = 20000.0;
-+    const float lb = -20000.0;
-+    if (CC_UNLIKELY(x > ub)) {
-+        ALOGE("setPosition out of boundary: x = %f", x);
-+        x = ub;
-+    } else if (CC_UNLIKELY(x < lb)) {
-+        ALOGE("setPosition out of boundary: x = %f", x);
-+        x = lb;
-+    }
-+    if (CC_UNLIKELY(y > ub)) {
-+        ALOGE("setPosition out of boundary: y = %f", y);
-+        y = ub;
-+    } else if (CC_UNLIKELY(x < lb)) {
-+        ALOGE("setPosition out of boundary: y = %f", y);
-+        y = lb;
-+    }
-+#endif
-     status_t err = validate();
-     if (err < 0) return err;
-     return mClient->setPosition(mHandle, x, y);
 diff --git a/libs/ui/Android.mk b/libs/ui/Android.mk
 index 2b16365..d4436bc 100644
 --- a/libs/ui/Android.mk
@@ -647,7 +615,7 @@ index 2b16365..d4436bc 100644
  	libsync \
  	libutils \
  	liblog
-+	
++
 +ifeq ($(BOARD_USES_MTK_HARDWARE),true)
 +LOCAL_CFLAGS += -DMTK_HARDWARE
 +	LOCAL_CPPFLAGS += -Wno-extra-semi -Wno-zero-length-array -Wno-gnu-statement-expression
@@ -1021,33 +989,6 @@ index 0000000..8dcd5ab
 +
 +
 +}; // namespace android
-diff --git a/opengl/include/EGL/eglext.h b/opengl/include/EGL/eglext.h
-index 2e18698..635db44 100644
---- a/opengl/include/EGL/eglext.h
-+++ b/opengl/include/EGL/eglext.h
-@@ -621,6 +621,10 @@ typedef EGLAPI EGLClientBuffer (EGLAPIENTRYP PFNEGLCREATENATIVECLIENTBUFFERANDRO
- #define EGL_MUTABLE_RENDER_BUFFER_BIT_KHR 0x1000
- #endif
- 
-+#ifdef MTK_HARDWARE
-+void* egl_GVR_FrontBuffer(const EGLSurface surface);
-+void* EGL_SEC_getClientBufferForFrontBuffer(EGLSurface surface);
-+#endif
- #ifndef EGL_ANDROID_get_frame_timestamps
- #define EGL_ANDROID_get_frame_timestamps 1
- #define EGL_TIMESTAMPS_ANDROID 0x314D
-@@ -638,6 +642,11 @@ typedef EGLAPI EGLBoolean (EGLAPIENTRYP PFNEGLGETFRAMETIMESTAMPSANDROID) (EGLDis
- typedef EGLAPI EGLBoolean (EGLAPIENTRYP PFNEGLQUERYTIMESTAMPSUPPORTEDANDROID) (EGLDisplay dpy, EGLSurface surface, EGLint timestamp);
- #endif
- #endif
-+#ifdef MTK_HARDWARE
-+void* egl_GVR_FrontBuffer(const EGLSurface surface);
-+void* EGL_SEC_getClientBufferForFrontBuffer(EGLSurface surface);
-+#define EGL_IS_INVALID_MTK    0x43210001
-+#endif
- 
- #ifdef __cplusplus
- }
 diff --git a/opengl/libs/EGL/Loader.cpp b/opengl/libs/EGL/Loader.cpp
 index 4234db8..b402a31 100644
 --- a/opengl/libs/EGL/Loader.cpp
@@ -1189,60 +1130,10 @@ index 04a8e41..bc5a1c7 100644
      ~Loader();
      
 diff --git a/opengl/libs/EGL/eglApi.cpp b/opengl/libs/EGL/eglApi.cpp
-index 0cd8b02..29289c0 100644
+index 0cd8b02..d42ef0c 100644
 --- a/opengl/libs/EGL/eglApi.cpp
 +++ b/opengl/libs/EGL/eglApi.cpp
-@@ -219,6 +219,12 @@ static const extention_map_t sExtensionMap[] = {
-     { "eglCreateStreamFromFileDescriptorKHR",
-             (__eglMustCastToProperFunctionPointerType)&eglCreateStreamFromFileDescriptorKHR },
- 
-+#ifdef MTK_HARDWARE
-+    { "egl_GVR_FrontBuffer",
-+            (__eglMustCastToProperFunctionPointerType)&egl_GVR_FrontBuffer },
-+    { "EGL_SEC_getClientBufferForFrontBuffer",
-+            (__eglMustCastToProperFunctionPointerType)&EGL_SEC_getClientBufferForFrontBuffer },
-+#endif
-     // EGL_ANDROID_get_frame_timestamps
-     { "eglGetFrameTimestampsANDROID",
-             (__eglMustCastToProperFunctionPointerType)&eglGetFrameTimestampsANDROID },
-@@ -659,6 +665,16 @@ EGLBoolean eglQuerySurface( EGLDisplay dpy, EGLSurface surface,
-         return setError(EGL_BAD_SURFACE, EGL_FALSE);
- 
-     egl_surface_t const * const s = get_surface(surface);
-+#ifdef MTK_HARDWARE
-+    if (attribute == EGL_IS_INVALID_MTK)
-+    {
-+        int tmp_w;
-+        EGLNativeWindowType win = (EGLNativeWindowType)s->win.get();
-+
-+        *value = s->win->query(win, NATIVE_WINDOW_HEIGHT, &tmp_w) != 0 ? 1 : 0;
-+        return EGL_TRUE;
-+    }
-+#endif
-     return s->cnx->egl.eglQuerySurface(
-             dp->disp.dpy, s->surface, attribute, value);
- }
-@@ -834,6 +850,19 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
-         // this will ALOGE the error
-         egl_connection_t* const cnx = &gEGLImpl;
-         result = setError(cnx->egl.eglGetError(), EGL_FALSE);
-+#ifdef MTK_HARDWARE
-+        if (NULL != cur_c)
-+        {
-+            SurfaceRef _cur_r(get_surface(cur_c->read));
-+            SurfaceRef _cur_d(get_surface(cur_c->draw));
-+
-+            cur_c->read = EGL_NO_SURFACE;
-+            cur_c->draw = EGL_NO_SURFACE;
-+
-+            _cur_r.release();
-+            _cur_d.release();
-+        }
-+#endif
-     }
-     return result;
- }
-@@ -1867,6 +1896,14 @@ EGLClientBuffer eglCreateNativeClientBufferANDROID(const EGLint *attrib_list)
+@@ -1867,6 +1867,14 @@ EGLClientBuffer eglCreateNativeClientBufferANDROID(const EGLint *attrib_list)
                      if (value & EGL_NATIVE_BUFFER_USAGE_TEXTURE_BIT_ANDROID) {
                          usage |= GRALLOC_USAGE_HW_TEXTURE;
                      }
@@ -1257,63 +1148,6 @@ index 0cd8b02..29289c0 100644
                      break;
                  default:
                      return setError(EGL_BAD_PARAMETER, (EGLClientBuffer)0);
-@@ -2036,6 +2073,44 @@ EGLBoolean eglSetDamageRegionKHR(EGLDisplay dpy, EGLSurface surface,
-     return EGL_FALSE;
- }
- 
-+#ifdef MTK_HARDWARE
-+void* egl_GVR_FrontBuffer(const EGLSurface surface)
-+{
-+    clearError();
-+    ALOGW("[MTKME2] [egl_GVR_FrontBuffer] [+]: surface(%p)\n", surface);
-+
-+    int fbr_egl_enabled = 1;
-+    char prop_value[128];
-+
-+    if (property_get("mtk.egl.fbr.enable", prop_value, "1") > 0) {
-+        fbr_egl_enabled = atoi(prop_value);
-+    }
-+
-+    if (!fbr_egl_enabled) {
-+        ALOGW("[MTKME2] [egl_GVR_FrontBuffer] [-]: return NULL! FBR is not enabled, fbr_egl_enabled(%d)\n", fbr_egl_enabled);
-+        return NULL;
-+    }
-+
-+    egl_surface_t const * const s = get_surface(surface);
-+    if (s->cnx->egl.eglGvrFrontBuffer) {
-+        if(s->cnx->egl.eglGvrFrontBuffer(s->surface)) {
-+            ALOGW("[MTKME2] [egl_GVR_FrontBuffer] [-]: return surface(%p)\n", surface);
-+            return surface;
-+        }
-+    }
-+
-+    ALOGW("[MTKME2] [egl_GVR_FrontBuffer] [-]: return NULL!\n");
-+    return NULL;
-+}
-+
-+void* EGL_SEC_getClientBufferForFrontBuffer(EGLSurface surface)
-+{
-+    ALOGW("[MTKME2] [EGL_SEC_getClientBufferForFrontBuffer]: surface(%p)\n", surface);
-+    return NULL;
-+}
-+#endif
-+
-+
- EGLBoolean eglGetFrameTimestampsANDROID(EGLDisplay dpy, EGLSurface surface,
-         EGLint framesAgo, EGLint numTimestamps, const EGLint *timestamps,
-         EGLnsecsANDROID *values)
-diff --git a/opengl/libs/EGL/egl_entries.in b/opengl/libs/EGL/egl_entries.in
-index 2b56718..c304973 100644
---- a/opengl/libs/EGL/egl_entries.in
-+++ b/opengl/libs/EGL/egl_entries.in
-@@ -96,3 +96,6 @@ EGL_ENTRY(EGLBoolean, eglAwakenProcessIMG, void)
- 
- EGL_ENTRY(EGLBoolean, eglSwapBuffersWithDamageKHR, EGLDisplay, EGLSurface, EGLint *, EGLint)
- EGL_ENTRY(EGLBoolean, eglSetDamageRegionKHR, EGLDisplay, EGLSurface, EGLint *, EGLint)
-+
-+/* MTK AOSP ENHANCEMENT */
-+EGL_ENTRY(EGLBoolean, eglGvrFrontBuffer, const EGLSurface)
-\ No newline at end of file
 diff --git a/vulkan/libvulkan/driver.cpp b/vulkan/libvulkan/driver.cpp
 index ba99d0c..6cd3f5f 100644
 --- a/vulkan/libvulkan/driver.cpp
@@ -1373,3 +1207,4 @@ index ba99d0c..6cd3f5f 100644
          module->common.methods->open(&module->common, HWVULKAN_DEVICE_0,
 -- 
 1.9.1
+
