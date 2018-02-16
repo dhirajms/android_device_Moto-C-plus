@@ -26,9 +26,15 @@
     <bool name="config_hspa_data_distinguishable">true</bool>
     
     <!-- Doze: does this device support STATE_DOZE and STATE_DOZE_SUSPEND?  -->
-    <!-- <bool name="doze_display_state_supported">true</bool>  -->
-    <!-- <bool name="doze_pulse_on_pick_up">true</bool>  -->
-    
+    <bool name="doze_display_state_supported">true</bool>
+    <!-- Doze: should the significant motion sensor be used as a pulse signal? -->
+    <bool name="doze_pulse_on_significant_motion">false</bool>
+    <bool name="doze_pulse_on_notifications">true</bool>
+    <!-- Doze: check proximity sensor before pulsing? -->
+    <bool name="doze_proximity_check_before_pulse">true</bool>
+    <!-- Doze: can we assume the pickup sensor includes a proximity check?
+         This is ignored if doze_pickup_subtype_performs_proximity_check is not empty.
+         @deprecated: use doze_pickup_subtype_performs_proximity_check instead.-->
+    <bool name="doze_pickup_performs_proximity_check">false</bool>
 
 </resources>
-
