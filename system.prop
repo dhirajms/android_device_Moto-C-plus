@@ -140,6 +140,7 @@ ro.longcheer.sku=EMEA
 ro.longcheer.simsum=2
 ro.longcheer.thermal=1
 ro.boot.opt_eccci_c2k=0
+ro.telephony.default_network=9
 
 # Camera
 media.stagefright.legacyencoder=true
