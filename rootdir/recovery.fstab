@@ -9,3 +9,4 @@
 /dev/block/mmcblk1	/sdcard		vfat	defaults defaults
 /dev/block/mmcblk1p1	/sdcard		vfat	defaults defaults
 /dev/block/mmcblk1p2	/sd-ext		auto	defaults defaults
+/usb-otg vfat /dev/block/sda1 /dev/block/sda flags=display="USB OTG";storage;wipeingui;removable
