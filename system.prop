@@ -57,7 +57,7 @@ ro.hardware.egl=mali
 #ro.mtk_perf_response_time=1
 
 ro.mediatek.chip_ver=S01
-ro.mediatek.version.release=alps-mp-n0.mp1-V1.0.2_wt6737m.35.n1_P69
+ro.mediatek.version.release=alps-mp-n0.mp1-V1.0.2_gr6737m.35.le.n_P74
 ro.mediatek.version.branch=alps-mp-n0.mp1
 ro.mediatek.platform=MT6737M
 ro.mediatek.version.sdk=4
