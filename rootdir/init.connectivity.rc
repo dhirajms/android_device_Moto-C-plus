@@ -54,7 +54,7 @@ service wmt_launcher /vendor/bin/wmt_launcher -p /vendor/firmware/
     user system
     group system
     class core
-   
+
 on property:service.wcn.coredump.mode=2
 start stp_dump
 
