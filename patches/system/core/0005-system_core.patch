@@ -1,3 +1,23 @@
+From 7603e05f11d22216701b0584fc534eb1a8b15918 Mon Sep 17 00:00:00 2001
+From: Mysteryagr <ahmedrahmy842@gmail.com>
+Date: Thu, 21 Dec 2017 16:21:46 +0000
+Subject: [PATCH] 0005-system_core.patch
+
+Change-Id: Iae28637be8a0943c3b00b2d1629927f6c5e5e56e
+---
+ include/netutils/ifc.h      |  15 ++
+ init/init.cpp               |   4 +-
+ init/init.h                 |   2 +-
+ init/service.cpp            |   6 +-
+ libcutils/Android.mk        |   5 +-
+ libcutils/fs_config.c       |   2 +-
+ libcutils/mtk_audioCompat.c |   4 +
+ libcutils/mtk_xlog.cpp      |  27 ++++
+ libnetutils/ifc_utils.c     | 323 ++++++++++++++++++++++++++++++++++++++++++++
+ 9 files changed, 380 insertions(+), 8 deletions(-)
+ create mode 100644 libcutils/mtk_audioCompat.c
+ create mode 100644 libcutils/mtk_xlog.cpp
+
 diff --git a/include/netutils/ifc.h b/include/netutils/ifc.h
 index 3b27234..03932ab 100644
 --- a/include/netutils/ifc.h
@@ -99,6 +119,19 @@ index 7a92253..c080b2d 100644
  LOCAL_CLANG := true
  LOCAL_SANITIZE := integer
  include $(BUILD_STATIC_LIBRARY)
+diff --git a/libcutils/fs_config.c b/libcutils/fs_config.c
+index 68cfcbe..3c01c79 100644
+--- a/libcutils/fs_config.c
++++ b/libcutils/fs_config.c
+@@ -143,7 +143,7 @@ static const struct fs_path_config android_files[] = {
+     { 00700, AID_SYSTEM,    AID_SHELL,     CAP_MASK_LONG(CAP_BLOCK_SUSPEND), "system/bin/inputflinger" },
+ 
+     /* Support FIFO scheduling mode in SurfaceFlinger. */
+-    { 00755, AID_SYSTEM,    AID_GRAPHICS,     CAP_MASK_LONG(CAP_SYS_NICE), "system/bin/surfaceflinger" },
++    //{ 00755, AID_SYSTEM,    AID_GRAPHICS,     CAP_MASK_LONG(CAP_SYS_NICE), "system/bin/surfaceflinger" },
+ 
+     { 00750, AID_ROOT,      AID_ROOT,      0, "system/bin/uncrypt" },
+     { 00750, AID_ROOT,      AID_ROOT,      0, "system/bin/install-recovery.sh" },
 diff --git a/libcutils/mtk_audioCompat.c b/libcutils/mtk_audioCompat.c
 new file mode 100644
 index 0000000..7b00e64
@@ -489,3 +522,4 @@ index 7739cf4..72832aa 100644
 +#endif
 -- 
 2.7.4
+

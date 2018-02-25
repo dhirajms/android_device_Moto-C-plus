@@ -21,7 +21,12 @@ on post-fs-data
 
 
 
-
+    #qidongdong@wind-mobi.com on 2016/12/13 add for sar sensor start
+    chmod 0666 /sys/bus/i2c/devices/2-0028/calibrate
+    chown system system /sys/bus/i2c/devices/2-0028/calibrate
+    chmod 0666 /sys/devices/bus/11009000.i2c/i2c-2/2-0028/calibrate
+    chown system system /sys/devices/bus/11009000.i2c/i2c-2/2-0028/calibrate
+    #qidongdong@wind-mobi.com on 2016/12/13 add for sar sensor end
 
 
 #Camera
@@ -40,24 +45,28 @@ on post-fs-data
     chmod 0660 /dev/DW9714AF
     chown system camera /dev/DW9714AF
 
-    chmod 0660 /dev/GT9762AF
-    chown system camera /dev/GT9762AF
-
-    chmod 0660 /dev/GT9762AFW
-    chown system camera /dev/GT9762AFW
-
     chmod 0660 /dev/AD5820AF
     chown system camera /dev/AD5820AF
 
 	chmod 0660 /dev/BU64745GWZAF
     chown system camera /dev/BU64745GWZAF
+#chenjinfa@wind-mobi.com add 2016/12/21  start
+#Moto Digital TV
+    chmod 0666 /dev/isdbt
+    chown system system /dev/isdbt
+#chenjinfa@wind-mobi.com add 2016/12/21  end
 
 #SMB
     chown system system /proc/smb/ScreenComm
     chmod 0660 /proc/smb/ScreenComm
 
-
-
+#wangshaohua@wind-mobi.com 20161205 start
+    chmod 0666 /sys/devices/platform/battery/Charging_disable
+#wangshaohua@wind-mobi.com 20161205 end
+# zhengxingshuang@wind-mobi.com add 2017/7/19 start
+    chmod 0666 /sys/devices/virtual/touchscreen/touchscreen_dev/tp_simulate_switch
+    chown system system /sys/devices/virtual/touchscreen/touchscreen_dev/tp_simulate_switch
+# zhengxingshuang@wind-mobi.com add 2017/7/19 end
 
 #Define device for ATCID
     chmod 660 /dev/ttyGS0
@@ -116,18 +125,7 @@ service audio-daemon /vendor/bin/audiocmdservice_atci
     disabled
     oneshot
 
-#add 20161025
-service version_switch /system/vendor/bin/vs parse
-    user root
-    group root
-    disabled
-    oneshot
 
-on property:persist.ril.bcode=set
-    start version_switch
-
-on property:service.nvram_init=Ready
-    start version_switch
 
 
 

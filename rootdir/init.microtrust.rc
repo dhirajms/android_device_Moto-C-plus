@@ -39,6 +39,7 @@ service teei_daemon /vendor/bin/teei_daemon
     disabled
    # oneshot
 
+# zhangheting@wind-mobi.com add teei patch 20170523
 on property:soter.teei.init=INIT_OK
     start init_thh_service
 

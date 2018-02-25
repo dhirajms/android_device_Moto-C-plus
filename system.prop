@@ -141,7 +141,3 @@ ro.longcheer.simsum=2
 ro.longcheer.thermal=1
 ro.boot.opt_eccci_c2k=0
 ro.telephony.default_network=20,20
-
-# Camera
-media.stagefright.legacyencoder=true
-media.stagefright.less-secure=true

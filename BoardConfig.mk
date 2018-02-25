@@ -37,8 +37,8 @@ BOARD_KERNEL_OFFSET := 0x00008000
 BOARD_MKBOOTIMG_ARGS := --kernel_offset $(BOARD_KERNEL_OFFSET) --ramdisk_offset $(BOARD_RAMDISK_OFFSET) --tags_offset $(BOARD_TAGS_OFFSET)
 
 #GCC
-KERNEL_TOOLCHAIN := $(ANDROID_BUILD_TOP)/prebuilts/gcc/$(HOST_OS)-x86/arm/arm-eabi-4.8/bin
-TARGET_KERNEL_CROSS_COMPILE_PREFIX := arm-eabi-
+#KERNEL_TOOLCHAIN := $(ANDROID_BUILD_TOP)/prebuilts/gcc/$(HOST_OS)-x86/arm/arm-eabi-4.8/bin
+#TARGET_KERNEL_CROSS_COMPILE_PREFIX := arm-eabi-
 
 # make_ext4fs requires numbers in dec format
 BOARD_BOOTIMAGE_PARTITION_SIZE := 16777216 
@@ -69,13 +69,12 @@ TARGET_RUNNING_WITHOUT_SYNC_FRAMEWORK := true
 TARGET_FORCE_HWC_FOR_VIRTUAL_DISPLAYS := true
 MTK_HWC_SUPPORT := yes
 MTK_HWC_VERSION := 1.4.1
-MTK_GPU_VERSION := mali midgard r7p0
+MTK_GPU_VERSION := mali midgard r12p1
 
 # Mediatek support
 BOARD_USES_MTK_HARDWARE := true
 
 # Camera
-TARGET_HAS_LEGACY_CAMERA_HAL1 := true
 USE_CAMERA_STUB := true
 
 # Boot animation

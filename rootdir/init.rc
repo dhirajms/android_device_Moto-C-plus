@@ -19,7 +19,7 @@ on early-init
     write /proc/1/oom_score_adj -1000
 
     # Disable sysrq from keyboard
-    #write /proc/sys/kernel/sysrq 0
+    write /proc/sys/kernel/sysrq 0
 
     # Set the security context of /adb_keys if present.
     restorecon /adb_keys
@@ -27,13 +27,14 @@ on early-init
     # Shouldn't be necessary, but sdcard won't start without it. http://b/22568628.
     mkdir /mnt 0775 root system
 
-  start ueventd
+    # Set the security context of /postinstall if present.
+    restorecon /postinstall
+
+    start ueventd
 
 on init
-
     sysclktz 0
 
-    write /proc/bootprof "INIT: on init start"
     # Mix device-specific information into the entropy pool
     copy /proc/cmdline /dev/urandom
     copy /default.prop /dev/urandom
@@ -47,31 +48,18 @@ on init
 
     # Mount cgroup mount point for cpu accounting
     mount cgroup none /acct cpuacct
-    chown system system /acct
     mkdir /acct/uid
 
     # Create energy-aware scheduler tuning nodes
     mkdir /dev/stune
     mount cgroup none /dev/stune schedtune
     mkdir /dev/stune/foreground
-    mkdir /dev/stune/background
-    mkdir /dev/stune/system-background
-    mkdir /dev/stune/top-app
     chown system system /dev/stune
     chown system system /dev/stune/foreground
-    chown system system /dev/stune/background
-    chown system system /dev/stune/system-background
-    chown system system /dev/stune/top-app
     chown system system /dev/stune/tasks
     chown system system /dev/stune/foreground/tasks
-    chown system system /dev/stune/background/tasks
-    chown system system /dev/stune/system-background/tasks
-    chown system system /dev/stune/top-app/tasks
     chmod 0664 /dev/stune/tasks
     chmod 0664 /dev/stune/foreground/tasks
-    chmod 0664 /dev/stune/background/tasks
-    chmod 0664 /dev/stune/system-background/tasks
-    chmod 0664 /dev/stune/top-app/tasks
 
     # Mount staging areas for devices managed by vold
     # See storage config details at http://source.android.com/tech/storage/
@@ -123,6 +111,7 @@ on init
     write /proc/sys/kernel/sched_tunable_scaling 0
     write /proc/sys/kernel/sched_latency_ns 10000000
     write /proc/sys/kernel/sched_wakeup_granularity_ns 2000000
+    write /proc/sys/kernel/sched_compat_yield 1
     write /proc/sys/kernel/sched_child_runs_first 0
 
     write /proc/sys/kernel/randomize_va_space 2
@@ -148,24 +137,24 @@ on init
     mkdir /dev/cpuctl
     mount cgroup none /dev/cpuctl cpu
     chown system system /dev/cpuctl
-    #chmod 0660 /dev/cpuctl
     chown system system /dev/cpuctl/tasks
     chmod 0666 /dev/cpuctl/tasks
+    write /dev/cpuctl/cpu.shares 1024
+    write /dev/cpuctl/cpu.rt_runtime_us 800000
     write /dev/cpuctl/cpu.rt_period_us 1000000
-    write /dev/cpuctl/cpu.rt_runtime_us 950000
 
-    #mkdir /dev/cpuctl/bg_non_interactive
-    #chown system system /dev/cpuctl/bg_non_interactive/tasks
-    #chmod 0666 /dev/cpuctl/bg_non_interactive/tasks
+    mkdir /dev/cpuctl/bg_non_interactive
+    chown system system /dev/cpuctl/bg_non_interactive/tasks
+    chmod 0666 /dev/cpuctl/bg_non_interactive/tasks
     # 5.0 %
-    #write /dev/cpuctl/bg_non_interactive/cpu.shares 52
-    #write /dev/cpuctl/bg_non_interactive/cpu.rt_period_us 1000000
-    # active FIFO threads will never be in BG
-    #write /dev/cpuctl/bg_non_interactive/cpu.rt_runtime_us 10000
+    write /dev/cpuctl/bg_non_interactive/cpu.shares 52
+    write /dev/cpuctl/bg_non_interactive/cpu.rt_runtime_us 700000
+    write /dev/cpuctl/bg_non_interactive/cpu.rt_period_us 1000000
 
     # sets up initial cpusets for ActivityManager
     mkdir /dev/cpuset
     mount cpuset none /dev/cpuset
+
     # this ensures that the cpusets are present and usable, but the device's
     # init.rc must actually set the correct cpus
     mkdir /dev/cpuset/foreground
@@ -177,6 +166,7 @@ on init
     mkdir /dev/cpuset/background
     write /dev/cpuset/background/cpus 0
     write /dev/cpuset/background/mems 0
+
     # system-background is for system tasks that should only run on
     # little cores, not on bigs
     # to be used only by init, so don't change system-bg permissions
@@ -204,6 +194,7 @@ on init
 
     # set system-background to 0775 so SurfaceFlinger can touch it
     chmod 0775 /dev/cpuset/system-background
+
     chmod 0664 /dev/cpuset/foreground/tasks
     chmod 0664 /dev/cpuset/foreground/boost/tasks
     chmod 0664 /dev/cpuset/background/tasks
@@ -236,17 +227,9 @@ on init
     # enable armv8_deprecated instruction hooks
     write /proc/sys/abi/swp 1
 
-	# ion device
-	chmod 0666 /dev/ion
-
     # Linux's execveat() syscall may construct paths containing /dev/fd
     # expecting it to point to /proc/self/fd
     symlink /proc/self/fd /dev/fd
-
-    export DOWNLOAD_CACHE /data/cache
-
-    # set RLIMIT_NICE to allow priorities from 19 to -20
-    setrlimit 13 40 40
 
 # Healthd can trigger a full boot from charger mode by signaling this
 # property when the power button is held.
@@ -270,10 +253,6 @@ on firmware_mounts_complete
 # Mount filesystems and start core system services.
 on late-init
     trigger early-fs
-    # Mount fstab in init.{$device}.rc by mount_all command. Optional parameter
-    # '--early' can be specified to skip entries with 'latemount'.
-    # /system and /vendor must be mounted by the end of the fs stage,
-    # while /data is optional.
     trigger fs
     trigger post-fs
 
@@ -282,17 +261,9 @@ on late-init
     # issued fs triggers have completed.
     trigger load_system_props_action
 
-    # Mount fstab in init.{$device}.rc by mount_all with '--late' parameter
-    # to only mount entries with 'latemount'. This is needed if '--early' is
-    # specified in the previous mount_all command on the fs stage.
-    # With /system mounted and properties form /system + /factory available,
-    # some services can be started.
-    trigger late-fs
-
     # Now we can mount /data. File encryption requires keymaster to decrypt
-    # /data, which in turn can only be loaded when system properties are present.
+    # /data, which in turn can only be loaded when system properties are present
     trigger post-fs-data
-    # Load persist properties and override properties (if enabled) from /data.
     trigger load_persist_props_action
 
     # Remove a file to wake up anything waiting for firmware.
@@ -374,7 +345,6 @@ on post-fs-data
 
     # create basic filesystem structure
     mkdir /data/misc 01771 system misc
-    mkdir /data/misc/adb 02750 system shell
     mkdir /data/misc/bluedroid 02770 bluetooth net_bt_stack
     # Fix the access permissions and group ownership for 'bt_config.conf'
     chmod 0660 /data/misc/bluedroid/bt_config.conf
@@ -430,10 +400,6 @@ on post-fs-data
     # create the A/B OTA directory, so as to enforce our permissions
     mkdir /data/ota 0771 root root
 
-    # create the OTA package directory. It will be accessed by GmsCore (cache
-    # group), update_engine and update_verifier.
-    mkdir /data/ota_package 0770 system cache
-
     # create resource-cache and double-check the perms
     mkdir /data/resource-cache 0771 system system
     chown system system /data/resource-cache
@@ -451,11 +417,6 @@ on post-fs-data
     mkdir /data/mediadrm 0770 mediadrm mediadrm
 
     mkdir /data/anr 0775 system system
-    mkdir /data/adb 0700 root root
-
-    # symlink to bugreport storage location
-    rm /data/bugreports
-    symlink /data/user_de/0/com.android.shell/files/bugreports /data/bugreports
 
     # Separate location for storing security policy files on data
     mkdir /data/security 0711 system system
@@ -468,7 +429,6 @@ on post-fs-data
     mkdir /data/system 0775 system system
     mkdir /data/system/heapdump 0700 system system
     mkdir /data/system/users 0775 system system
-    mkdir /data/system/theme 0755 system system
 
     mkdir /data/system_de 0770 system system
     mkdir /data/system_ce 0770 system system
@@ -483,15 +443,9 @@ on post-fs-data
     mkdir /data/media 0770 media_rw media_rw
     mkdir /data/media/obb 0770 media_rw media_rw
 
-    mkdir /data/cache 0770 system cache
-    mkdir /data/cache/recovery 0770 system cache
-    mkdir /data/cache/backup_stage 0700 system system
-    mkdir /data/cache/backup 0700 system system
-
     init_user0
 
     # Reload policy from /data/security if present.
-    #setprop selinux.reload_policy 1
 
     # Set SELinux security contexts on upgrade or policy update.
     restorecon_recursive /data
@@ -510,6 +464,9 @@ on boot
     ifup lo
     hostname localhost
     domainname localdomain
+
+    # set RLIMIT_NICE to allow priorities from 19 to -20
+    setrlimit 13 40 40
 
     # Memory management.  Basic kernel parameters, and allow the high
     # level system server to be able to adjust the kernel OOM driver
@@ -571,15 +528,11 @@ on boot
     chown system system /sys/class/timed_output/vibrator/enable
     chown system system /sys/class/leds/keyboard-backlight/brightness
     chown system system /sys/class/leds/lcd-backlight/brightness
-    chown system system /sys/class/leds/torch-light/brightness
     chown system system /sys/class/leds/button-backlight/brightness
     chown system system /sys/class/leds/jogball-backlight/brightness
     chown system system /sys/class/leds/red/brightness
-    chown system system /sys/class/leds/red/blink
     chown system system /sys/class/leds/green/brightness
-    chown system system /sys/class/leds/green/blink
     chown system system /sys/class/leds/blue/brightness
-    chown system system /sys/class/leds/blue/blink
     chown system system /sys/class/leds/red/device/grpfreq
     chown system system /sys/class/leds/red/device/grppwm
     chown system system /sys/class/leds/red/device/blink
@@ -592,11 +545,6 @@ on boot
     chown system system /sys/kernel/ipv4/tcp_rmem_def
     chown system system /sys/kernel/ipv4/tcp_rmem_max
     chown root radio /proc/cmdline
-    #lenovo-sw limm3 added for led sys node
-    chmod 0664 /sys/class/power_supply/battery/charging_led_flag
-    chown system system /sys/class/power_supply/battery/charging_led_flag
-    restorecon /sys/class/power_supply/battery/charging_led_flag
-    #lenovo-sw limm3 added for led sys node
 
     # Define default initial receive window size in segments.
     setprop net.tcp.default_init_rwnd 60
@@ -605,7 +553,7 @@ on boot
 
 on nonencrypted
     # A/B update verifier that marks a successful boot.
-    exec - root cache -- /system/bin/update_verifier nonencrypted
+    exec - root -- /system/bin/update_verifier nonencrypted
     class_start main
     class_start late_start
 
@@ -628,12 +576,12 @@ on property:vold.decrypt=trigger_post_fs_data
 
 on property:vold.decrypt=trigger_restart_min_framework
     # A/B update verifier that marks a successful boot.
-    exec - root cache -- /system/bin/update_verifier trigger_restart_min_framework
+    exec - root -- /system/bin/update_verifier trigger_restart_min_framework
     class_start main
 
 on property:vold.decrypt=trigger_restart_framework
     # A/B update verifier that marks a successful boot.
-    exec - root cache -- /system/bin/update_verifier trigger_restart_framework
+    exec - root -- /system/bin/update_verifier trigger_restart_framework
     class_start main
     class_start late_start
 
@@ -690,31 +638,3 @@ on property:ro.debuggable=1
 service flash_recovery /system/bin/install-recovery.sh
     class main
     oneshot
-    disabled
-
-on property:ro.build.type=eng
-    chmod 0777 /data/anr
-    chmod 0777 /data/misc
-
-on property:ro.build.type=userdebug
-    chmod 0777 /data/anr
-    chmod 0777 /data/misc
-
-on property:ro.build.type=user
-    chmod 0771 /data/anr
-    chmod 01771 /data/misc
-
-on property:persist.logd.logpersistd=logcatd
-    # all exec/services are called with umask(077), so no gain beyond 0700
-    mkdir /data/misc/logd 0700 logd log
-    # logd for write to /data/misc/logd, log group for read from pstore (-L)
-    exec - logd log -- /system/bin/logcat -L -b default -v threadtime -v usec -v printable -D -f /data/misc/logd/logcat -r 2048 -n 256
-    start logcatd
-
-service logcatd /system/bin/logcat -b default -v threadtime -v usec -v printable -D -f /data/misc/logd/logcat -r 2048 -n 256
-    class late_start
-    disabled
-    # logd for write to /data/misc/logd, log group for read from log daemon
-    user logd
-    group log
-

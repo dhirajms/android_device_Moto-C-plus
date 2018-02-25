@@ -25,11 +25,12 @@ on early-init
     chmod 0755 /sys/kernel/debug
 
 on init
-    # export LD_SHIM_LIBS
+
+   # export LD_SHIM_LIBS
     export LD_PRELOAD "libmtk_symbols.so mtk_symbols.so"
     export LD_SHIM_LIBS /system/lib/libcamera_client.so|libmtk_symbols.so
     export LD_SHIM_LIBS /system/vendor/lib/libcam_platform.so|libmtk_symbols.so
-
+    
     # Support legacy paths
     symlink /sdcard /mnt/sdcard
 
@@ -62,6 +63,11 @@ on init
 
 on late-init
     write /proc/bootprof "INIT:late-init"
+    # boot time fs tune
+    write /sys/block/mmcblk0/queue/iostats 0
+    write /sys/block/mmcblk0/queue/iosched/slice_idle 0
+    write /sys/block/mmcblk0/queue/read_ahead_kb 2048
+    write /sys/block/mmcblk0/queue/nr_requests 256
 
 # mount different fs start
 
@@ -186,7 +192,15 @@ on post-fs-data
     chmod 666 /dev/mali0
     #chown system graphics /dev/mali
 
-
+    # Tune Parameters from a6k temp values if will revert if lags
+    write /sys/module/process_reclaim/parameters/enable_process_reclaim 1
+    write /sys/module/process_reclaim/parameters/pressure_max 70
+    write /sys/module/process_reclaim/parameters/swap_opt_eff 30
+    write /sys/module/lowmemorykiller/parameters/enable_adaptive_lmk 0
+    write /sys/module/process_reclaim/parameters/pressure_min 50
+    write /sys/module/process_reclaim/parameters/per_swap_size 512
+    write /sys/module/lowmemorykiller/parameters/vmpressure_file_min 53059
+    write /sys/module/lowmemorykiller/parameters/minfree "18432,23040,27648,32256,36864,46080"
 
     # Touch Panel
     # chmod 0664 /dev/touch
@@ -328,13 +342,6 @@ on post-fs-data
     chown system system /sys/class/misc/m_baro_misc/barobatch
     chown system system /sys/class/misc/m_baro_misc/baroflush
 
-    # Hardwareinfo
-    chmod 0666 /dev/hardwareinfo
-    chown system system /dev/hardwareinfo
-    
-     # tp_emulate_ps
-    chmod 0666 /dev/tp_emulate_ps
-    chown system system /dev/tp_emulate_ps
 
     #Accdet
     chown root radio /sys/devices/platform/Accdet_Driver/driver/accdet_call_state
@@ -522,6 +529,11 @@ on post-fs-data
     chmod 0660 /dev/kd_camera_hw_bus2
     chmod 0660 /dev/FM50AF
     chmod 0660 /dev/CAM_CAL_DRV
+    # luminjie@wind-mobi.com 20170105 begin
+    chmod 0660 /dev/CAM_CAL_DRV1
+    chmod 0660 /dev/CAM_CAL_DRV2
+    chmod 0660 /dev/CAM_CAL_DRV3
+    # luminjie@wind-mobi.com 20170105 end
 
     chown system camera /dev/camera-sysram
     chown system camera /dev/camera-isp
@@ -532,6 +544,11 @@ on post-fs-data
     chown system camera /dev/kd_camera_hw_bus2
     chown system camera /dev/FM50AF
     chown system camera /dev/CAM_CAL_DRV
+    # luminjie@wind-mobi.com 20170105 begin
+    chown system camera /dev/CAM_CAL_DRV1
+    chown system camera /dev/CAM_CAL_DRV2
+    chown system camera /dev/CAM_CAL_DRV3
+    # luminjie@wind-mobi.com 20170105 end
 
     #MATV
     chmod 0660 /dev/MATV
@@ -577,6 +594,7 @@ on post-fs-data
     chown root system /mtd@misc
 
     chmod 0664 /sys/bus/platform/drivers/mem_bw_ctrl/concurrency_scenario
+    chown media media /sys/bus/platform/drivers/mem_bw_ctrl/concurrency_scenario
     chown system mediacodec /sys/bus/platform/drivers/mem_bw_ctrl/concurrency_scenario
 
     #mtk_sched
@@ -719,24 +737,24 @@ on boot
     chmod 660 /dev/ttyGS1
     chown system /dev/ttyGS1
 
-
-on property:ro.board.platform=mt6753
-    chown system system /sys/devices/system/cpu/cpufreq/interactive/hispeed_freq
-    chmod 0660 /sys/devices/system/cpu/cpufreq/interactive/hispeed_freq
-    write /sys/devices/system/cpu/cpufreq/interactive/hispeed_freq 1300000
+on property:sys.boot_completed=1
+    # end boot time fs tune
+    write /sys/block/mmcblk0/queue/read_ahead_kb 128
+    write /sys/block/mmcblk0/queue/nr_requests 128
+    write /sys/block/mmcblk0/queue/iostats 1
 
 on property:vold.decrypt=trigger_reset_main
     write /proc/bootprof "INIT:vold.decrypt=trigger_reset_main"
     start stop_modem
     setprop sys.boot_completed 0
     setprop dev.bootcomplete 0
-    setprop service.nvram_init 0
 
 on property:vold.decrypt=trigger_post_fs_data
     write /proc/bootprof "INIT:vold.decrypt=trigger_post_fs_data"
 
 on property:vold.decrypt=trigger_restart_min_framework
     write /proc/bootprof "INIT:vold.decrypt=trigger_restart_min_framework"
+    setprop service.nvram_init 0
     start nvram_daemon
     start sysenv_daemon
     start start_modem
@@ -746,6 +764,7 @@ on property:vold.decrypt=trigger_restart_min_framework
 
 on property:vold.decrypt=trigger_restart_framework
     write /proc/bootprof "INIT:vold.decrypt=trigger_restart_framework"
+    setprop service.nvram_init 0
     start nvram_daemon
     start sysenv_daemon
     start start_modem
@@ -759,7 +778,6 @@ on property:vold.decrypt=trigger_shutdown_framework
     stop stp_dump
     setprop sys.boot_completed 0
     setprop dev.bootcomplete 0
-    setprop service.nvram_init 0
 
 service stop_modem /vendor/bin/md_ctrl 0
     class main
@@ -1384,6 +1402,11 @@ service OperaMaxSystem /system/bin/OperaMaxSystem
     socket tunman stream 0666 system system
     class main
     disabled
+#chusuxia@wind-mobi.com 20161227 add for SIMLOCK start
+on property:sys.smlstate=1
+    write /protect_f/simlock_state_data "0"
+    chmod 777 /protect_f/simlock_state_data
+#chusuxia@wind-mobi.com 20161227 add for SIMLOCK end
 
 on property:persist.service.operamax=1
     start OperaMaxSystem
@@ -1500,13 +1523,6 @@ service usp_service /vendor/bin/usp_service
     group root system radio
     disabled
     oneshot
-
-service sensor_acc /system/vendor/bin/sensor_acc
-    user root
-    oneshot
-    disabled
-on property:service.nvram_init=Ready
-    start sensor_acc
 
 on property:persist.mtk_usp_native_start=1
     start usp_service

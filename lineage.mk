@@ -23,3 +23,7 @@ PRODUCT_NAME := lineage_panelli
 PRODUCT_BRAND := Moto
 PRODUCT_MODEL := Moto C Plus
 PRODUCT_MANUFACTURER := Motorola
+
+#use magisk
+WITH_MAGISK := true
+ROOT_METHOD := magisk
