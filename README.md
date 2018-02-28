@@ -16,15 +16,19 @@ Display | 5.0 inches
 Camera  | Main 8MP / Front 2MP, autofocus, LED flash
 Sensors | Acc only
 
+#Thanks to olegsvs, danielhk, Zormax, xcore995, SRT,Mysteryagr
+
 ### Working:[currently all things are under test]
 - [x] Wifi
 - [x] Sound
 - [x] LiveDisplay
 - [x] Ril
-- [] Codecs
 - [x] Camera, flashlight
 - [x] Radio
 - [x] Bluetooth
 - [x] Sensors
 - [x] Hotspot
 - ...
+
+### Not Working:
+- Camcorder
