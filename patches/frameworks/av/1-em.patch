@@ -1,0 +1,1523 @@
+diff --git a/include/media/AudioSystem.h b/include/media/AudioSystem.h
+index 268791e..3d13702 100644
+--- a/include/media/AudioSystem.h
++++ b/include/media/AudioSystem.h
+@@ -474,6 +474,14 @@ private:
+     static audio_channel_mask_t gPrevInChannelMask;
+ 
+     static sp<IAudioPolicyService> gAudioPolicyService;
++    //add zormax. for AM mode set/get  parameters
++    public:
++    static status_t GetEMParameter(void *ptr,size_t len);
++    static status_t SetEMParameter(void *ptr,size_t len);
++    static status_t SetAudioCommand(int par1,int par2);
++    static status_t GetAudioCommand(int par1, int *par2);
++    static status_t SetAudioData(int par1,size_t len, void *ptr);
++    static status_t GetAudioData(int par1,size_t len,void *ptr);
+ };
+ 
+ };  // namespace android
+diff --git a/include/media/IAudioFlinger.h b/include/media/IAudioFlinger.h
+index 096f7ef..8d5f030 100644
+--- a/include/media/IAudioFlinger.h
++++ b/include/media/IAudioFlinger.h
+@@ -245,6 +245,15 @@ public:
+ 
+     // Returns the number of frames per audio HAL buffer.
+     virtual size_t frameCountHAL(audio_io_handle_t ioHandle) const = 0;
++
++    // add zormax, get EM parameter
++    virtual status_t GetEMParameter(void *ptr, size_t len) = 0;
++    virtual status_t SetEMParameter(void *ptr, size_t len) = 0;
++    virtual status_t SetAudioCommand(int parameters1, int parameter2) = 0;
++    virtual status_t GetAudioCommand(int parameters1) = 0;
++    virtual status_t SetAudioData(int par1,size_t len,void *ptr)=0;
++    virtual status_t GetAudioData(int par1,size_t len,void *ptr)=0;
++
+ };
+ 
+ 
+diff --git a/include/media/IAudioPolicyService.h b/include/media/IAudioPolicyService.h
+index 06bf4b8..def2bb9 100644
+--- a/include/media/IAudioPolicyService.h
++++ b/include/media/IAudioPolicyService.h
+@@ -124,6 +124,9 @@ public:
+     // bit rate, duration, video and streaming or offload property is enabled
+     virtual bool isOffloadSupported(const audio_offload_info_t& info) = 0;
+ 
++   // zormax add
++   virtual status_t SetPolicyManagerParameters(int par1,int par2 ,int par3,int par4) = 0;
++
+     /* List available audio ports and their attributes */
+     virtual status_t listAudioPorts(audio_port_role_t role,
+                                     audio_port_type_t type,
+diff --git a/media/libmedia/AudioSystem.cpp b/media/libmedia/AudioSystem.cpp
+index 35d3a7c..63b74eb 100644
+--- a/media/libmedia/AudioSystem.cpp
++++ b/media/libmedia/AudioSystem.cpp
+@@ -26,6 +26,9 @@
+ 
+ #include <system/audio.h>
+ 
++// zormax add
++#include <AudioPolicyParameters.h>
++#include <AudioMTKHardwareCommand.h>
+ // ----------------------------------------------------------------------------
+ 
+ namespace android {
+@@ -1334,5 +1337,111 @@ void AudioSystem::AudioPolicyServiceClient::binderDied(const wp<IBinder>& who __
+ 
+     ALOGW("AudioPolicyService server died!");
+ }
++// zormax start
++//add , for EM mode
++status_t AudioSystem::GetEMParameter(void *ptr,size_t len)
++{
++#ifdef MTK_HARDWARE
++    const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
++    if (af == 0) return PERMISSION_DENIED;
++    return af->GetEMParameter(ptr,len);
++#endif
++    return OK;
++}
++
++status_t AudioSystem::SetEMParameter(void *ptr,size_t len)
++{
++#ifdef MTK_HARDWARE
++    const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
++    if (af == 0) return PERMISSION_DENIED;
++    return af->SetEMParameter(ptr,len);
++#endif
++}
++
++status_t AudioSystem::SetAudioCommand(int par1,int par2)
++{
++#ifdef MTK_HARDWARE
++    status_t af_status;
++    ALOGD("AudioSystem::SetAudioCommand");
++    const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
++    if (af == 0)
++    {
++        ALOGE("AudioSystem::SetAudioCommand Error!! PERMISSION_DENIED");
++        return PERMISSION_DENIED;
++    }
++    af_status = af->SetAudioCommand(par1,par2);
++
++    if (par1 == SET_LOAD_VOLUME_SETTING)
++    {
++        const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
++        if(aps != 0)
++        {
++            aps->SetPolicyManagerParameters (POLICY_LOAD_VOLUME,0,0,0);
++        }
++    }
++
++    return af_status;
++
++#endif
++    return OK;
++}
++
++status_t AudioSystem::GetAudioCommand(int par1,int* par2)
++{
++#ifdef MTK_HARDWARE
++    ALOGD("AudioSystem::GetAudioCommand");
++    const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
++    if (af == 0)
++    {
++        ALOGE("AudioSystem::GetAudioCommand Error!! PERMISSION_DENIED");
++        return PERMISSION_DENIED;
++    }
++    *par2 =  af->GetAudioCommand(par1);
++#endif
++    return NO_ERROR;
++}
++
++status_t AudioSystem::SetAudioData(int par1,size_t byte_len,void *ptr)
++{
++#ifdef MTK_HARDWARE
++    status_t af_status;
++    ALOGD("SetAudioData");
++    const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
++    if (af == 0)
++    {
++        ALOGE("AudioSystem::SetAAudioData Error!! PERMISSION_DENIED");
++        return PERMISSION_DENIED;
++    }
++    af_status = af->SetAudioData(par1,byte_len,ptr);
++
++    if (par1 == SET_AUDIO_VER1_DATA)
++    {
++        const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
++        if(aps != 0)
++        {
++            aps->SetPolicyManagerParameters (POLICY_LOAD_VOLUME,0,0,0);
++        }
++    }
++
++    return af_status;
++#endif
++    return OK;
++}
++
++status_t AudioSystem::GetAudioData(int par1,size_t byte_len,void *ptr)
++{
++#ifdef MTK_HARDWARE
++    ALOGD("GetAudioData");
++    const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
++    if (af == 0)
++    {
++        ALOGE("AudioSystem::GetAAudioData Error!! PERMISSION_DENIED");
++        return PERMISSION_DENIED;
++    }
++    return af->GetAudioData(par1,byte_len,ptr);
++#endif
++    return OK;
++}
++// zormax end
+ 
+ } // namespace android
+diff --git a/media/libmedia/IAudioFlinger.cpp b/media/libmedia/IAudioFlinger.cpp
+index 900d418..352015b 100644
+--- a/media/libmedia/IAudioFlinger.cpp
++++ b/media/libmedia/IAudioFlinger.cpp
+@@ -82,7 +82,16 @@ enum {
+     SET_AUDIO_PORT_CONFIG,
+     GET_AUDIO_HW_SYNC,
+     SYSTEM_READY,
+-    FRAME_COUNT_HAL,
++    FRAME_COUNT_HAL
++#ifdef MTK_HARDWARE
++,
++    GET_EM_PARAMETER  = 0x7FFF0000,  //Don't call by CTS for security
++    SET_EM_PARAMETER,
++    SET_AUDIO_COMMAND,
++    GET_AUDIO_COMMAND,
++    SET_AUDIO_DATA,
++    GET_AUDIO_DATA,
++#endif
+ };
+ 
+ #define MAX_ITEMS_PER_LIST 1024
+@@ -929,6 +938,91 @@ public:
+         }
+         return reply.readInt64();
+     }
++// zormax add
++#ifdef MTK_HARDWARE
++    virtual status_t GetEMParameter(void *ptr, size_t len)
++    {
++        Parcel data, reply;
++        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
++        data.writeInt32(len);
++        data.write(ptr,len);
++        remote()->transact(GET_EM_PARAMETER, data, &reply);
++        reply.read(ptr, len);
++        return OK;
++    }
++    virtual status_t SetEMParameter(void *ptr, size_t len)
++    {
++        Parcel data, reply;
++        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
++        data.writeInt32(len);
++        data.write(ptr,len);
++        remote()->transact(SET_EM_PARAMETER, data, &reply);
++        reply.read(ptr, len);
++        return OK;
++    }
++    virtual status_t SetAudioCommand(int var1,int var2)
++    {
++        Parcel data, reply;
++        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
++        data.writeInt32(var1);
++        data.writeInt32(var2);
++        remote()->transact(SET_AUDIO_COMMAND, data, &reply);
++        return  reply.readInt32();
++    }
++    virtual status_t GetAudioCommand(int var1)
++    {
++        Parcel data, reply;
++        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
++        data.writeInt32(var1);
++        remote()->transact(GET_AUDIO_COMMAND, data, &reply);
++        return  reply.readInt32();
++    }
++    virtual status_t SetAudioData(int par1, size_t len, void *ptr)
++    {
++        Parcel data, reply;
++        if (ptr == NULL || len > 16384) {
++            return BAD_VALUE;
++        }
++        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
++        data.writeInt32(par1);
++        data.writeInt32(len);
++        if (len > 0) {
++            data.write(ptr, len);
++        }
++        status_t lStatus = remote()->transact(SET_AUDIO_DATA, data, &reply);
++        if (lStatus != NO_ERROR) {
++            ALOGE("SetAudioData error: %s", strerror(-lStatus));
++        } else {
++            if (len > 0) {
++                reply.read(ptr, len);
++            }
++        }
++        return reply.readInt32();
++    }
++
++    virtual status_t GetAudioData(int par1, size_t len, void *ptr)
++    {
++        Parcel data, reply;
++        if (ptr == NULL || len > 16384) {
++            return BAD_VALUE;
++        }
++        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
++        data.writeInt32(par1);
++        data.writeInt32(len);
++        if (len > 0) {
++            data.write(ptr, len);
++        }
++        status_t lStatus = remote()->transact(GET_AUDIO_DATA, data, &reply);
++        if (lStatus != NO_ERROR) {
++            ALOGE("GetAudioData error: %s", strerror(-lStatus));
++        } else {
++            if (len > 0) {
++                reply.read(ptr, len);
++            }
++        }
++        return reply.readInt32();
++    }
++#endif
+ 
+ };
+ 
+@@ -1449,6 +1543,127 @@ status_t BnAudioFlinger::onTransact(
+             reply->writeInt64( frameCountHAL((audio_io_handle_t) data.readInt32()) );
+             return NO_ERROR;
+         } break;
++#ifdef MTK_HARDWARE
++        // zormax add for EM mode Setting
++        case GET_EM_PARAMETER:
++        {
++            CHECK_INTERFACE(IAudioFlinger, data, reply);
++            size_t size = data.readInt32();
++            void *params = malloc(size);
++            data.read(params, size);
++            status_t err = GetEMParameter(params,size);
++            if (err == NO_ERROR){
++                reply->write( params,size);
++            }
++            free(params);
++            return NO_ERROR;
++        }break;
++        case SET_EM_PARAMETER:
++        {
++            CHECK_INTERFACE(IAudioFlinger, data, reply);
++            size_t size = data.readInt32();
++            void *params = malloc(size);
++            data.read(params, size);
++            status_t err = SetEMParameter(params,size);
++            if (err == NO_ERROR){
++                reply->write(params,size);
++            }
++            free(params);
++            return NO_ERROR;
++        }break;
++        case SET_AUDIO_COMMAND:
++        {
++            CHECK_INTERFACE(IAudioFlinger, data, reply);
++            int32_t command1 = data.readInt32();
++            int32_t command2 = data.readInt32();
++            reply->writeInt32(SetAudioCommand(command1,command2));
++            return NO_ERROR;
++        }break;
++        case GET_AUDIO_COMMAND:
++        {
++            CHECK_INTERFACE(IAudioFlinger, data, reply);
++            int32_t command1 = data.readInt32();
++            reply->writeInt32(GetAudioCommand(command1));
++            return NO_ERROR;
++        }break;
++#if 0
++        case SET_AUDIO_DATA:
++        {
++            CHECK_INTERFACE(IAudioFlinger, data, reply);
++            size_t command = data.readInt32();
++            size_t buf_size = data.readInt32();
++            void *params = malloc(buf_size);
++            data.read(params, buf_size);
++            status_t err = SetAudioData(command,buf_size,params);
++            reply->write(params,buf_size);
++            free(params);
++            return NO_ERROR;
++        }break;
++        case GET_AUDIO_DATA:
++        {
++            CHECK_INTERFACE(IAudioFlinger, data, reply);
++            size_t command = data.readInt32();
++            size_t buf_size = data.readInt32();
++            void *params = malloc(buf_size);
++            data.read(params, buf_size);
++            status_t err = GetAudioData(command,buf_size,params);
++            reply->write(params,buf_size);
++            free(params);
++            return NO_ERROR;
++        }break;
++#else   //Sync Sprout modification
++        case SET_AUDIO_DATA: {
++            CHECK_INTERFACE(IAudioFlinger, data, reply);
++            size_t command = data.readInt32();
++            size_t buf_size = data.readInt32();
++            if (buf_size > 16384) {
++                reply->writeInt32(BAD_VALUE);
++                return BAD_VALUE;
++            }
++            void *params = NULL;
++            if (buf_size > 0) {
++                params = malloc(buf_size);
++                if (params == NULL) {
++                    reply->writeInt32(BAD_VALUE);
++                    return BAD_VALUE;
++                }
++                data.read(params, buf_size);
++            }
++            status_t status = SetAudioData(command, buf_size, params);
++            if (params != NULL) {
++                reply->write(params, buf_size);
++                free(params);
++            }
++            reply->writeInt32(status);
++            return NO_ERROR;
++        } break;
++        case GET_AUDIO_DATA: {
++            CHECK_INTERFACE(IAudioFlinger, data, reply);
++            size_t command = data.readInt32();
++            size_t buf_size = data.readInt32();
++            if (buf_size > 16384) {
++                reply->writeInt32(BAD_VALUE);
++                return BAD_VALUE;
++            }
++            void *params = NULL;
++            if (buf_size > 0) {
++                params = malloc(buf_size);
++                if (params == NULL) {
++                    reply->writeInt32(BAD_VALUE);
++                    return BAD_VALUE;
++                }
++                data.read(params, buf_size);
++            }
++            status_t status = GetAudioData(command, buf_size, params);
++            if (params != NULL) {
++                reply->write(params, buf_size);
++                free(params);
++            }
++            reply->writeInt32(status);
++            return NO_ERROR;
++        } break;
++#endif
++#endif
+         default:
+             return BBinder::onTransact(code, data, reply, flags);
+     }
+diff --git a/media/libmedia/IAudioPolicyService.cpp b/media/libmedia/IAudioPolicyService.cpp
+index 2dd1611..b622ee1 100644
+--- a/media/libmedia/IAudioPolicyService.cpp
++++ b/media/libmedia/IAudioPolicyService.cpp
+@@ -76,6 +76,9 @@ enum {
+     SET_AUDIO_PORT_CALLBACK_ENABLED,
+     SET_MASTER_MONO,
+     GET_MASTER_MONO,
++#ifdef MTK_HARDWARE
++    SET_POLICYMANAGER_PARAMETERS,
++#endif
+     LIST_AUDIO_SESSIONS,
+ };
+ 
+@@ -510,6 +513,20 @@ public:
+         return status;
+     }
+ 
++// zormax add
++#ifdef MTK_HARDWARE
++    virtual status_t SetPolicyManagerParameters(int par1,int par2 ,int par3,int par4)
++    {
++        Parcel data, reply;
++        data.writeInterfaceToken(IAudioPolicyService::getInterfaceDescriptor());
++        data.writeInt32(par1);
++        data.writeInt32(par2);
++        data.writeInt32(par3);
++        data.writeInt32(par4);
++        remote()->transact(SET_POLICYMANAGER_PARAMETERS, data, &reply);
++        return static_cast <status_t> (reply.readInt32());
++    }
++#endif
+     virtual bool isOffloadSupported(const audio_offload_info_t& info)
+     {
+         Parcel data, reply;
+@@ -1165,6 +1182,17 @@ status_t BnAudioPolicyService::onTransact(
+             return status;
+         }
+ 
++#ifdef MTK_HARDWARE
++        case SET_POLICYMANAGER_PARAMETERS: {
++            CHECK_INTERFACE(IAudioPolicyService, data, reply);
++            int par1 =data.readInt32();
++            int par2 =data.readInt32();
++            int par3 =data.readInt32();
++            int par4 =data.readInt32();
++            reply->writeInt32(SetPolicyManagerParameters(par1,par2,par3,par4));
++            return NO_ERROR;
++        } break;
++#endif
+         case IS_OFFLOAD_SUPPORTED: {
+             CHECK_INTERFACE(IAudioPolicyService, data, reply);
+             audio_offload_info_t info;
+diff --git a/services/audioflinger/AudioFlinger.cpp b/services/audioflinger/AudioFlinger.cpp
+index 9244e5b..233466f 100644
+--- a/services/audioflinger/AudioFlinger.cpp
++++ b/services/audioflinger/AudioFlinger.cpp
+@@ -60,6 +60,10 @@
+ 
+ #include <system/audio.h>
+ #include <hardware/audio.h>
++// add zormax
++#ifdef MTK_HARDWARE
++#include <audio_mtk.h>
++#endif
+ 
+ #include "AudioMixer.h"
+ #include "AudioFlinger.h"
+@@ -128,6 +132,172 @@ size_t AudioFlinger::mTeeSinkTrackFrames = kTeeSinkTrackFramesDefault;
+ static const nsecs_t kMinGlobalEffectEnabletimeNs = seconds(7200);
+ 
+ // ----------------------------------------------------------------------------
++// add zormax, support EM mode setting
++#ifdef MTK_HARDWARE
++status_t AudioFlinger::SetEMParameter(void *ptr, size_t len)
++{
++    ALOGV("SetEMParameter ");
++    AutoMutex lock(mHardwareLock);
++    if (NULL == mPrimaryHardwareDev)
++    {
++        ALOGE("%s mPrimaryHardwareDev is null",__FUNCTION__);
++        return INVALID_OPERATION;
++    }
++
++    audio_hw_device_mtk_t *dev = (audio_hw_device_mtk_t*) mPrimaryHardwareDev->hwDevice();
++
++    if (NULL == dev)
++    {
++        ALOGE("%s dev is null",__FUNCTION__);
++        return INVALID_OPERATION;
++    }
++
++    if (NULL == dev->SetEMParameter)
++    {
++        ALOGE("%s dev->%s is null",__FUNCTION__,__FUNCTION__);
++        return INVALID_OPERATION;
++    }
++
++    mHardwareStatus = AUDIO_HW_SET_PARAMETER;
++    dev->SetEMParameter(dev,ptr,len);
++    mHardwareStatus = AUDIO_HW_IDLE;
++    return NO_ERROR;
++}
++
++status_t AudioFlinger::GetEMParameter(void *ptr, size_t len)
++{
++    ALOGV("GetEMParameter ");
++    // ioHandle == 0 means the parameters are global to the audio hardware interface
++    AutoMutex lock(mHardwareLock);
++    if (NULL == mPrimaryHardwareDev)
++    {
++        ALOGE("%s mPrimaryHardwareDev is null",__FUNCTION__);
++        return INVALID_OPERATION;
++    }
++    audio_hw_device_mtk_t *dev = static_cast<audio_hw_device_mtk_t*>(mPrimaryHardwareDev->hwDevice());
++    if (NULL == dev)
++    {
++        ALOGE("%s dev is null",__FUNCTION__);
++        return INVALID_OPERATION;
++    }
++    if (NULL == dev->GetEMParameter)
++    {
++        ALOGE("%s dev->%s is null",__FUNCTION__,__FUNCTION__);
++        return INVALID_OPERATION;
++    }
++    mHardwareStatus = AUDIO_HW_SET_PARAMETER;
++    dev->GetEMParameter(dev,ptr,len);
++    mHardwareStatus = AUDIO_HW_IDLE;
++    return NO_ERROR;
++}
++
++status_t AudioFlinger::SetAudioData(int par1,size_t len,void *ptr)
++{
++    ALOGV("SetAudioData par1 = %d,len = %zu ", par1, len);
++    AutoMutex lock(mHardwareLock);
++    if (NULL == mPrimaryHardwareDev)
++    {
++        ALOGE("%s mPrimaryHardwareDev is null",__FUNCTION__);
++        return INVALID_OPERATION;
++    }
++    audio_hw_device_mtk_t *dev = static_cast<audio_hw_device_mtk_t*>(mPrimaryHardwareDev->hwDevice());
++    if (NULL == dev)
++    {
++        ALOGE("%s dev is null",__FUNCTION__);
++        return INVALID_OPERATION;
++    }
++    if (NULL == dev->SetAudioData)
++    {
++        ALOGE("%s dev->%s is null",__FUNCTION__,__FUNCTION__);
++        return INVALID_OPERATION;
++    }
++    mHardwareStatus = AUDIO_HW_SET_PARAMETER;
++    dev->SetAudioData(dev,par1,len,ptr);
++    mHardwareStatus = AUDIO_HW_IDLE;
++    return NO_ERROR;
++}
++
++status_t AudioFlinger::GetAudioData(int par1,size_t len,void *ptr)
++{
++    ALOGV("GetAudioData par1 = %d,len = %zu ", par1, len);
++    AutoMutex lock(mHardwareLock);
++    if (NULL == mPrimaryHardwareDev)
++    {
++        ALOGE("%s mPrimaryHardwareDev is null",__FUNCTION__);
++        return INVALID_OPERATION;
++    }
++    audio_hw_device_mtk_t *dev = static_cast<audio_hw_device_mtk_t*>(mPrimaryHardwareDev->hwDevice());
++    if (NULL == dev)
++    {
++        ALOGE("%s dev is null",__FUNCTION__);
++        return INVALID_OPERATION;
++    }
++    if (NULL == dev->GetAudioData)
++    {
++        ALOGE("%s dev->%s is null",__FUNCTION__,__FUNCTION__);
++        return INVALID_OPERATION;
++    }
++    mHardwareStatus = AUDIO_HW_SET_PARAMETER;
++    dev->GetAudioData(dev,par1,len,ptr);
++    mHardwareStatus = AUDIO_HW_IDLE;
++    return NO_ERROR;
++}
++
++status_t AudioFlinger::SetAudioCommand(int parameters1,int parameters2)
++{
++    ALOGV("SetAudioCommand par1 = %d,par2 = %d ",parameters1,parameters2);
++    AutoMutex lock(mHardwareLock);
++    if (NULL == mPrimaryHardwareDev)
++    {
++        ALOGE("%s mPrimaryHardwareDev is null",__FUNCTION__);
++        return INVALID_OPERATION;
++    }
++    audio_hw_device_mtk_t *dev = static_cast<audio_hw_device_mtk_t*>(mPrimaryHardwareDev->hwDevice());
++    if (NULL == dev)
++    {
++        ALOGE("%s dev is null",__FUNCTION__);
++        return INVALID_OPERATION;
++    }
++    if (NULL == dev->SetAudioCommand)
++    {
++        ALOGE("%s dev->%s is null",__FUNCTION__,__FUNCTION__);
++        return INVALID_OPERATION;
++    }
++    mHardwareStatus = AUDIO_HW_SET_PARAMETER;
++    dev->SetAudioCommand(dev,parameters1,parameters2);
++    mHardwareStatus = AUDIO_HW_IDLE;
++    return NO_ERROR;
++}
++
++status_t AudioFlinger::GetAudioCommand(int parameters1)
++{
++    ALOGV("GetAudioCommand par1 = %d",parameters1);
++    int value =0;
++    AutoMutex lock(mHardwareLock);
++    if (NULL == mPrimaryHardwareDev)
++    {
++        ALOGE("%s mPrimaryHardwareDev is null",__FUNCTION__);
++        return INVALID_OPERATION;
++    }
++    audio_hw_device_mtk_t *dev = static_cast<audio_hw_device_mtk_t*>(mPrimaryHardwareDev->hwDevice());
++    if (NULL == dev)
++    {
++        ALOGE("%s dev is null",__FUNCTION__);
++        return INVALID_OPERATION;
++    }
++    if (NULL == dev->GetAudioCommand)
++    {
++        ALOGE("%s dev->%s is null",__FUNCTION__,__FUNCTION__);
++        return INVALID_OPERATION;
++    }
++
++    mHardwareStatus = AUDIO_HW_SET_PARAMETER;
++    value =dev->GetAudioCommand(dev,parameters1);
++    mHardwareStatus = AUDIO_HW_IDLE;
++    return value;
++}
++#endif
++// ----------------------------------------------------------------------------
+ 
+ const char *formatToString(audio_format_t format) {
+     switch (audio_get_main_format(format)) {
+diff --git a/services/audioflinger/AudioFlinger.h b/services/audioflinger/AudioFlinger.h
+index a417754..55946a6 100644
+--- a/services/audioflinger/AudioFlinger.h
++++ b/services/audioflinger/AudioFlinger.h
+@@ -117,6 +117,15 @@ class AudioFlinger :
+ public:
+     static const char* getServiceName() ANDROID_API { return "media.audio_flinger"; }
+ 
++    // add zormax to EM mode setting
++#ifdef MTK_HARDWARE
++    virtual status_t GetEMParameter(void *ptr, size_t len);
++    virtual status_t SetEMParameter(void *ptr, size_t len);
++    virtual status_t SetAudioData(int par1,size_t len,void *ptr);
++    virtual status_t GetAudioData(int par1,size_t len,void *ptr);
++    virtual status_t SetAudioCommand(int parameters1,int parameters2);
++    virtual status_t GetAudioCommand(int parameters1);
++#endif
+     virtual     status_t    dump(int fd, const Vector<String16>& args);
+ 
+     // IAudioFlinger interface, in binder opcode order
+diff --git a/services/audiopolicy/Android.mk b/services/audiopolicy/Android.mk
+index dc47235..7b1991f 100644
+--- a/services/audiopolicy/Android.mk
++++ b/services/audiopolicy/Android.mk
+@@ -70,6 +70,16 @@ endif
+ # DOLBY_END
+ LOCAL_CFLAGS += -Wall -Werror
+ 
++# zormax add
++ifeq ($(BOARD_USES_MTK_HARDWARE),true)
++LOCAL_CFLAGS += -DMTK_HARDWARE
++
++LOCAL_SHARED_LIBRARIES += \
++    libmedia \
++    libaudiocustparam
++
++endif
++
+ include $(BUILD_SHARED_LIBRARY)
+ 
+ ifneq ($(USE_LEGACY_AUDIO_POLICY), 1)
+@@ -130,6 +140,16 @@ LOCAL_CFLAGS += -Wall -Werror
+ 
+ LOCAL_MULTILIB := $(AUDIOSERVER_MULTILIB)
+ 
++# zormax add
++ifeq ($(BOARD_USES_MTK_HARDWARE),true)
++LOCAL_CFLAGS += -DMTK_HARDWARE
++
++LOCAL_SHARED_LIBRARIES += \
++    libmedia \
++    libaudiocustparam
++
++endif
++
+ LOCAL_MODULE:= libaudiopolicymanagerdefault
+ 
+ include $(BUILD_SHARED_LIBRARY)
+@@ -160,6 +180,15 @@ LOCAL_CFLAGS := -Wall -Werror
+ 
+ LOCAL_MULTILIB := $(AUDIOSERVER_MULTILIB)
+ 
++# zormax add
++ifeq ($(BOARD_USES_MTK_HARDWARE),true)
++LOCAL_CFLAGS += -DMTK_HARDWARE
++
++LOCAL_SHARED_LIBRARIES += \
++    libmedia \
++    libaudiocustparam
++
++endif
+ LOCAL_MODULE:= libaudiopolicymanager
+ 
+ include $(BUILD_SHARED_LIBRARY)
+diff --git a/services/audiopolicy/AudioPolicyInterface.h b/services/audiopolicy/AudioPolicyInterface.h
+index 2d7cbdd..7783815 100644
+--- a/services/audiopolicy/AudioPolicyInterface.h
++++ b/services/audiopolicy/AudioPolicyInterface.h
+@@ -22,6 +22,8 @@
+ #include <utils/String8.h>
+ 
+ #include <hardware/audio_policy.h>
++// zormax add
++#include <AudioCustomVolume.h>
+ 
+ namespace android {
+ 
+@@ -228,6 +230,8 @@ public:
+                                       audio_io_handle_t *handle,
+                                       uid_t uid) = 0;
+     virtual status_t stopAudioSource(audio_io_handle_t handle) = 0;
++    // zormax add
++    virtual status_t SetPolicyManagerParameters(int par1, int par2 , int par3 , int par4) = 0;
+ 
+     virtual status_t setMasterMono(bool mono) = 0;
+     virtual status_t getMasterMono(bool *mono) = 0;
+@@ -343,6 +347,8 @@ public:
+                     audio_patch_handle_t patchHandle) = 0;
+     virtual void onOutputSessionEffectsUpdate(sp<AudioSessionInfo>& streamInfo, bool added) = 0;
+ 
++// zormax add
++    virtual status_t getCustomAudioVolume(void* pCustomVol) = 0;
+ };
+ 
+ #ifndef USE_LEGACY_AUDIO_POLICY
+diff --git a/services/audiopolicy/common/managerdefinitions/Android.mk b/services/audiopolicy/common/managerdefinitions/Android.mk
+index 69d84e4..25c44c9 100644
+--- a/services/audiopolicy/common/managerdefinitions/Android.mk
++++ b/services/audiopolicy/common/managerdefinitions/Android.mk
+@@ -73,6 +73,15 @@ LOCAL_MULTILIB := $(AUDIOSERVER_MULTILIB)
+ 
+ LOCAL_CFLAGS += -Wall -Werror
+ 
++# zormax add
++ifeq ($(BOARD_USES_MTK_HARDWARE),true)
++LOCAL_CFLAGS += -DMTK_HARDWARE
++
++LOCAL_SHARED_LIBRARIES += \
++    libmedia \
++    libaudiocustparam
++
++endif
+ LOCAL_MODULE := libaudiopolicycomponents
+ 
+ include $(BUILD_STATIC_LIBRARY)
+diff --git a/services/audiopolicy/engine/interface/AudioPolicyManagerObserver.h b/services/audiopolicy/engine/interface/AudioPolicyManagerObserver.h
+index 846fa48..066dcba 100755
+--- a/services/audiopolicy/engine/interface/AudioPolicyManagerObserver.h
++++ b/services/audiopolicy/engine/interface/AudioPolicyManagerObserver.h
+@@ -26,6 +26,8 @@
+ #include <AudioOutputDescriptor.h>
+ #include <AudioPolicyMix.h>
+ #include <SoundTriggerSession.h>
++// zormax add
++#include <AudioPolicyVendorControl.h>
+ 
+ namespace android {
+ 
+@@ -54,6 +56,8 @@ public:
+     virtual IVolumeCurvesCollection &getVolumeCurves() = 0;
+ 
+     virtual const sp<DeviceDescriptor> &getDefaultOutputDevice() const = 0;
++    // zormax add
++    virtual AudioPolicyVendorControl &getAudioPolicyVendorControl() = 0;
+ 
+ protected:
+     virtual ~AudioPolicyManagerObserver() {}
+diff --git a/services/audiopolicy/enginedefault/Android.mk b/services/audiopolicy/enginedefault/Android.mk
+index 543b82b..681099f 100755
+--- a/services/audiopolicy/enginedefault/Android.mk
++++ b/services/audiopolicy/enginedefault/Android.mk
+@@ -50,4 +50,13 @@ LOCAL_SHARED_LIBRARIES += \
+     libutils \
+     libaudioutils \
+ 
++# zormax add
++ifeq ($(BOARD_USES_MTK_HARDWARE),true)
++LOCAL_CFLAGS += -DMTK_HARDWARE
++
++LOCAL_SHARED_LIBRARIES += \
++    libmedia \
++    libaudiocustparam
++
++endif
+ include $(BUILD_SHARED_LIBRARY)
+diff --git a/services/audiopolicy/enginedefault/src/Engine.cpp b/services/audiopolicy/enginedefault/src/Engine.cpp
+index 6db66b0..1a7b6e6 100755
+--- a/services/audiopolicy/enginedefault/src/Engine.cpp
++++ b/services/audiopolicy/enginedefault/src/Engine.cpp
+@@ -85,9 +85,21 @@ status_t Engine::setPhoneState(audio_mode_t state)
+         ALOGV("  Entering call in setPhoneState()");
+         mApmObserver->getVolumeCurves().switchVolumeCurve(AUDIO_STREAM_VOICE_CALL,
+                                                           AUDIO_STREAM_DTMF);
++// zormax add
++#ifdef MTK_HARDWARE
++        AudioPolicyVendorControl &mAudioPolicyVendorControl = mApmObserver->getAudioPolicyVendorControl();
++        mAudioPolicyVendorControl.setVoiceReplaceDTMFStatus(true);
++#endif
++
+     } else if (is_state_in_call(oldState) && !is_state_in_call(state)) {
+         ALOGV("  Exiting call in setPhoneState()");
+         mApmObserver->getVolumeCurves().restoreOriginVolumeCurve(AUDIO_STREAM_DTMF);
++// zormax add
++#ifdef MTK_HARDWARE
++        AudioPolicyVendorControl &mAudioPolicyVendorControl = mApmObserver->getAudioPolicyVendorControl();
++        mAudioPolicyVendorControl.setVoiceReplaceDTMFStatus(false);
++#endif
++
+     }
+     return NO_ERROR;
+ }
+@@ -575,6 +587,7 @@ audio_devices_t Engine::getDeviceForInputSource(audio_source_t inputSource) cons
+     const DeviceVector &availableOutputDevices = mApmObserver->getAvailableOutputDevices();
+     const DeviceVector &availableInputDevices = mApmObserver->getAvailableInputDevices();
+     const SwAudioOutputCollection &outputs = mApmObserver->getOutputs();
++
+     audio_devices_t availableDeviceTypes = availableInputDevices.types() & ~AUDIO_DEVICE_BIT_IN;
+ 
+     uint32_t device = AUDIO_DEVICE_NONE;
+diff --git a/services/audiopolicy/managerdefault/AudioPolicyManager.cpp b/services/audiopolicy/managerdefault/AudioPolicyManager.cpp
+index 8c39f78..7fb7911 100644
+--- a/services/audiopolicy/managerdefault/AudioPolicyManager.cpp
++++ b/services/audiopolicy/managerdefault/AudioPolicyManager.cpp
+@@ -67,9 +67,29 @@
+ #ifdef DOLBY_ENABLE
+ #include "DolbyAudioPolicy_impl.h"
+ #endif // DOLBY_END
++// zormax add
++#include <audio_mtk.h>
++#include <AudioPolicyParameters.h>
+ 
+ namespace android {
+ 
++// zormax start
++#ifndef VOICE_VOLUME_MAX
++#define VOICE_VOLUME_MAX       (160)
++#endif
++#ifndef VOICE_ONEDB_STEP
++#define VOICE_ONEDB_STEP         (4)
++#endif
++// debug
++#if 0
++#define MTK_ALOGVV(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
++#define MTK_ALOGV(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
++#else
++#define MTK_ALOGVV(...) do { } while(0)
++#define MTK_ALOGV(...) do { } while(0)
++#endif
++// zormax end
++
+ //FIXME: workaround for truncated touch sounds
+ // to be removed when the problem is handled by system UI
+ #define TOUCH_SOUND_FIXED_DELAY_MS 100
+@@ -3406,6 +3426,18 @@ AudioPolicyManager::AudioPolicyManager(AudioPolicyClientInterface *clientInterfa
+                 if (mPrimaryOutput == 0 &&
+                         outProfile->getFlags() & AUDIO_OUTPUT_FLAG_PRIMARY) {
+                     mPrimaryOutput = outputDesc;
++		// zormax add
++		#ifdef MTK_HARDWARE
++                    mAudioCustVolumeTable.bRev = CUSTOM_VOLUME_REV_1;
++                    mAudioCustVolumeTable.bReady = 0;
++                    mpClientInterface->getCustomAudioVolume(&mAudioCustVolumeTable);
++                    if (mAudioCustVolumeTable.bReady!=0) {
++                        ALOGD("mUseCustomVolume true");
++                        mAudioPolicyVendorControl.setCustomVolumeStatus(true);
++                    } else {
++                        ALOGD("mUseCustomVolume false");
++                    }
++		#endif
+                 }
+                 addOutput(output, outputDesc);
+                 setOutputDevice(outputDesc,
+@@ -5069,7 +5101,20 @@ float AudioPolicyManager::computeVolume(audio_stream_type_t stream,
+                                         int index,
+                                         audio_devices_t device)
+ {
++// zormax add
++#ifdef MTK_HARDWARE
++    float volumeDB;
++    if (mAudioPolicyVendorControl.getCustomVolumeStatus()) {
++            volumeDB = Volume::AmplToDb(computeCustomVolume(stream, index, device));
++    } else {
++        ALOGW("%s,not Customer Volume, Using Android Volume Curve",__FUNCTION__);
++            volumeDB = mVolumeCurves->volIndexToDb(stream, Volume::getDeviceCategory(device), index);
++    }
++    ALOGD("%s streamtype [%d],index [%d],device [0x%x], volumeDb [%f]",__FUNCTION__,stream,index,device,volumeDB);
++#else
+     float volumeDB = mVolumeCurves->volIndexToDb(stream, Volume::getDeviceCategory(device), index);
++#endif
++
+ 
+     // handle the case of accessibility active while a ringtone is playing: if the ringtone is much
+     // louder than the accessibility prompt, the prompt cannot be heard, thus masking the touch
+@@ -5177,7 +5222,17 @@ status_t AudioPolicyManager::checkAndSetVolume(audio_stream_type_t stream,
+         float voiceVolume;
+         // Force voice volume to max for bluetooth SCO as volume is managed by the headset
+         if (stream == AUDIO_STREAM_VOICE_CALL) {
++// zormax add
++#ifdef MTK_HARDWARE
++            if (mAudioPolicyVendorControl.getCustomVolumeStatus()) {
++                voiceVolume = computeCustomVolume(stream, index, device);
++            } else {
++            voiceVolume = (float)index/(float)mVolumeCurves->getVolumeIndexMax(stream);
++            }
++#else
+             voiceVolume = (float)index/(float)mVolumeCurves->getVolumeIndexMax(stream);
++#endif
++
+         } else {
+             voiceVolume = 1.0;
+         }
+@@ -5636,5 +5691,299 @@ void AudioPolicyManager::updateAudioProfiles(audio_devices_t device,
+         profiles.addProfileFromHal(new AudioProfile(format, channelMasks, samplingRates));
+     }
+ }
++// zormax add start
++status_t AudioPolicyManager::SetPolicyManagerParameters(int par1,int par2 ,int par3,int par4)
++{
++    audio_devices_t primaryOutDevices = mPrimaryOutput->device();
++    audio_devices_t curDevice =Volume::getDeviceForVolume(mPrimaryOutput->device());
++    ALOGD("SetPolicyManagerParameters par1 = %d par2 = %d par3 = %d par4 = %d curDevice = 0x%x",par1,par2,par3,par4,curDevice);
++    status_t volStatus;
++    switch(par1) {
++        case POLICY_LOAD_VOLUME:{
++            LoadCustomVolume();
++            for(int i =0; i<AUDIO_STREAM_CNT;i++) {
++                if (i == AUDIO_STREAM_PATCH) {
++                    continue;
++                }
++                volStatus =checkAndSetVolume((audio_stream_type_t)i, mVolumeCurves->getVolumeIndex((audio_stream_type_t) i, primaryOutDevices), mPrimaryOutput,primaryOutDevices,50,true);
++            }
++            break;
++         }
++        default:
++            break;
++    }
++
++    return NO_ERROR;
++}
++
++float AudioPolicyManager::linearToLog(int volume)
++{
++    return volume ? exp(float(fCUSTOM_VOLUME_MAPPING_STEP - volume) * fBConvert) : 0;
++}
++
++int AudioPolicyManager::logToLinear(float volume)
++{
++    return volume ? fCUSTOM_VOLUME_MAPPING_STEP - int(fBConvertInverse * log(volume) + 0.5) : 0;
++}
++
++int AudioPolicyManager::mapVol(float &vol, float unitstep)
++{
++    int index = (vol+0.5)/unitstep;
++    vol -= (index*unitstep);
++    return index;
++}
++
++int AudioPolicyManager::mapping_Voice_vol(float &vol, float unitstep)
++{
++    #define ROUNDING_NUM (1)
++
++    if (vol < unitstep) {
++        return 1;
++    }
++    if (vol < (unitstep*2 + ROUNDING_NUM)) {
++        vol -= unitstep;
++        return 2;
++    } else if (vol < (unitstep*3 + ROUNDING_NUM)) {
++        vol -= unitstep*2;
++        return 3;
++    } else if (vol < (unitstep*4 + ROUNDING_NUM)) {
++        vol -= unitstep*3;
++        return 4;
++    } else if (vol < (unitstep*5 + ROUNDING_NUM)) {
++        vol -= unitstep*4;
++        return 5;
++    } else if (vol < (unitstep*6 + ROUNDING_NUM)) {
++        vol -= unitstep*5;
++        return 6;
++    } else if (vol < (unitstep*7 + ROUNDING_NUM)) {
++        vol -= unitstep*6;
++        return 7;
++    } else {
++        ALOGW("vole = %f unitstep = %f",vol,unitstep);
++        return 0;
++    }
++}
++
++
++int AudioPolicyManager::getStreamMaxLevels(int stream)
++{
++    return (int) mAudioCustVolumeTable.audiovolume_level[stream];
++}
++
++// this function will map vol 0~100 , base on customvolume map to 0~255 , and do linear calculation to set mastervolume
++float AudioPolicyManager::mapVoltoCustomVol(unsigned char array[], int volmin, int volmax,float &vol , int stream)
++{
++    MTK_ALOGV("+MapVoltoCustomVol vol = %f stream = %d volmin = %d volmax = %d",vol,stream,volmin,volmax);
++    CustomVolumeType vol_stream = (CustomVolumeType) stream;
++    audio_stream_type_t audio_stream = (audio_stream_type_t) stream;
++
++    if (vol_stream == CUSTOM_VOL_TYPE_VOICE_CALL || vol_stream == CUSTOM_VOL_TYPE_SIP) {
++        return mapVoiceVoltoCustomVol(array,volmin,volmax,vol,stream);
++    } else if (vol_stream >= CUSTOM_NUM_OF_VOL_TYPE || vol_stream < CUSTOM_VOL_TYPE_VOICE_CALL) {
++        ALOGE("%s %d Error : stream = %d",__FUNCTION__,__LINE__,stream);
++        audio_stream = AUDIO_STREAM_MUSIC;
++        vol_stream = CUSTOM_VOL_TYPE_MUSIC;
++    }
++
++    float volume =0.0;
++    if (vol == 0) {
++        volume = vol;
++        return 0;
++    } else {    // map volume value to custom volume
++        int dMaxLevels = getStreamMaxLevels(vol_stream);
++        int streamDescmIndexMax = mVolumeCurves->getVolumeIndexMax(audio_stream);// streamDesc.getVolumeIndexMax();
++        if (dMaxLevels <= 0) {
++            ALOGE("%s %d Error : dMaxLevels = %d",__FUNCTION__,__LINE__,dMaxLevels);
++            dMaxLevels = 1;
++        }
++        if (streamDescmIndexMax <= 0) {
++            ALOGE("%s %d Error : streamDescmIndexMax = %d",__FUNCTION__,__LINE__,streamDescmIndexMax);
++            streamDescmIndexMax = 1;
++        }
++
++        float unitstep = fCUSTOM_VOLUME_MAPPING_STEP/dMaxLevels;
++        if (vol < fCUSTOM_VOLUME_MAPPING_STEP/streamDescmIndexMax) {
++            volume = array[0];
++            vol = volume;
++            return volume;
++        }
++        int Index = mapVol(vol, unitstep);
++        float Remind = (1.0 - (float)vol/unitstep);
++        if (Index != 0) {
++            volume = ((array[Index]  - (array[Index] - array[Index-1]) * Remind)+0.5);
++        } else {
++            volume = 0;
++        }
++        MTK_ALOGVV("%s vol [%f] unitstep [%f] Index [%d] Remind [%f] volume [%f]",__FUNCTION__,vol,unitstep,Index,Remind,volume);
++    }
++    // -----clamp for volume
++    if ( volume > 253.0) {
++        volume = fCUSTOM_VOLUME_MAPPING_STEP;
++    } else if ( volume <= array[0]) {
++        volume = array[0];
++    }
++    vol = volume;
++    MTK_ALOGVV("%s volume [%f] vol [%f]",__FUNCTION__,volume,vol);
++    return volume;
++}
++
++// this function will map vol 0~100 , base on customvolume map to 0~255 , and do linear calculation to set mastervolume
++float AudioPolicyManager::mapVoiceVoltoCustomVol(unsigned char array[], int volmin __unused, int volmax __unused, float &vol, int vol_stream_type)
++{
++    vol = (int)vol;
++    float volume = 0.0;
++//  StreamDescriptor &streamDesc = mStreams.valueFor((audio_stream_type_t)AUDIO_STREAM_VOICE_CALL);//mStreams[AUDIO_STREAM_VOICE_CALL];
++    if (vol == 0) {
++        volume = array[0];
++    } else {
++        int dMaxIndex = getStreamMaxLevels(AUDIO_STREAM_VOICE_CALL)-1;
++        if (dMaxIndex < 0) {
++            ALOGE("%s %d Error : dMaxIndex = %d",__FUNCTION__,__LINE__,dMaxIndex);
++            dMaxIndex = 1;
++        }
++        if (vol >= fCUSTOM_VOLUME_MAPPING_STEP) {
++            volume = array[dMaxIndex];
++            MTK_ALOGVV("%s volumecheck stream = %d index = %d volume = %f",__FUNCTION__,AUDIO_STREAM_VOICE_CALL,dMaxIndex,volume);
++        } else {
++            double unitstep = fCUSTOM_VOLUME_MAPPING_STEP /dMaxIndex;
++            int Index = mapping_Voice_vol(vol, unitstep);
++            // boundary for array
++            if (Index >= dMaxIndex) {
++                Index = dMaxIndex;
++            }
++            float Remind = (1.0 - (float)vol/unitstep) ;
++            if (Index != 0) {
++                volume = (array[Index]  - (array[Index] - array[Index- 1]) * Remind)+0.5;
++            } else {
++                volume =0;
++            }
++            MTK_ALOGVV("%s volumecheck stream = %d index = %d volume = %f",__FUNCTION__,AUDIO_STREAM_VOICE_CALL,Index,volume);
++            MTK_ALOGVV("%s dMaxIndex [%d] vol [%f] unitstep [%f] Index [%d] Remind [%f] volume [%f]",__FUNCTION__,dMaxIndex,vol,unitstep,Index,Remind,volume);
++        }
++    }
++
++     if ( volume > CUSTOM_VOICE_VOLUME_MAX && vol_stream_type == CUSTOM_VOL_TYPE_VOICE_CALL) {
++         volume = CUSTOM_VOICE_VOLUME_MAX;
++     }
++     else if ( volume > 253.0) {
++        volume = fCUSTOM_VOLUME_MAPPING_STEP;
++     }
++     else if ( volume <= array[0]) {
++         volume = array[0];
++     }
++
++     vol = volume;
++     if ( vol_stream_type == CUSTOM_VOL_TYPE_VOICE_CALL) {
++     float degradeDb = (CUSTOM_VOICE_VOLUME_MAX-vol)/CUSTOM_VOICE_ONEDB_STEP;
++     MTK_ALOGVV("%s volume [%f] degradeDb [%f]",__FUNCTION__,volume,degradeDb);
++     vol = fCUSTOM_VOLUME_MAPPING_STEP - (degradeDb*4);
++     }
++     MTK_ALOGVV("%s volume [%f] vol [%f]",__FUNCTION__,volume,vol);
++     return volume;
++}
++
++float AudioPolicyManager::computeCustomVolume(int stream, int index, audio_devices_t device)
++{
++    // check if force use exist , get output device for certain mode
++    device_category deviceCategory = Volume::getDeviceCategory(device);
++    // compute custom volume
++    float volume =0.0;
++    int volmax=0 , volmin =0;
++    int custom_vol_device_mode,audiovolume_steamtype;
++    int dMaxStepIndex = 0;
++
++    MTK_ALOGVV("%s volumecheck stream = %d index = %d device = %d",__FUNCTION__,stream,index,device);
++
++    if (mAudioPolicyVendorControl.getVoiceReplaceDTMFStatus() && stream == AUDIO_STREAM_DTMF) {
++        //normalize new index from 0~15(audio) to 0~6(voice)
++        float DTMFvolInt = (fCUSTOM_VOLUME_MAPPING_STEP * (index - mVolumeCurves->getVolumeIndexMin(AUDIO_STREAM_DTMF))) / (mVolumeCurves->getVolumeIndexMax(AUDIO_STREAM_DTMF) - mVolumeCurves->getVolumeIndexMin(AUDIO_STREAM_DTMF));
++        index = (DTMFvolInt*(mVolumeCurves->getVolumeIndexMax(AUDIO_STREAM_VOICE_CALL) - mVolumeCurves->getVolumeIndexMin(AUDIO_STREAM_VOICE_CALL))/ (fCUSTOM_VOLUME_MAPPING_STEP)) + mVolumeCurves->getVolumeIndexMin(AUDIO_STREAM_VOICE_CALL);
++        MTK_ALOGVV("volumecheck refine DTMF index [%d] to Voice index [%d]",tempindex,index);
++        stream = (int) AUDIO_STREAM_VOICE_CALL;
++    }
++
++    float volInt = (fCUSTOM_VOLUME_MAPPING_STEP * (index - mVolumeCurves->getVolumeIndexMin((audio_stream_type_t)stream))) / (mVolumeCurves->getVolumeIndexMax((audio_stream_type_t)stream) - mVolumeCurves->getVolumeIndexMin((audio_stream_type_t)stream));
++
++    if (deviceCategory == DEVICE_CATEGORY_SPEAKER) {
++        custom_vol_device_mode = CUSTOM_VOLUME_SPEAKER_MODE;
++        if ((device & AUDIO_DEVICE_OUT_WIRED_HEADSET)||
++             (device & AUDIO_DEVICE_OUT_WIRED_HEADPHONE))
++                custom_vol_device_mode = CUSTOM_VOLUME_HEADSET_SPEAKER_MODE;
++    } else if (deviceCategory == DEVICE_CATEGORY_HEADSET) {
++        custom_vol_device_mode = CUSTOM_VOLUME_HEADSET_MODE;
++    } else if (deviceCategory == DEVICE_CATEGORY_EARPIECE) {
++        custom_vol_device_mode = CUSTOM_VOLUME_NORMAL_MODE;
++    } else {
++        custom_vol_device_mode = CUSTOM_VOLUME_HEADSET_SPEAKER_MODE;
++    }
++
++    if ((stream == (int) AUDIO_STREAM_VOICE_CALL) && (mEngine->getPhoneState() == AUDIO_MODE_IN_COMMUNICATION)) {
++        audiovolume_steamtype = (int) CUSTOM_VOL_TYPE_SIP;
++    } else if (stream >= (int) AUDIO_STREAM_VOICE_CALL && stream < (int) AUDIO_STREAM_CNT) {
++        audiovolume_steamtype = stream;
++    } else {
++        audiovolume_steamtype = (int) CUSTOM_VOL_TYPE_MUSIC;
++        ALOGE("%s %d Error : audiovolume_steamtype = %d",__FUNCTION__,__LINE__,audiovolume_steamtype);
++    }
++
++    dMaxStepIndex = getStreamMaxLevels(audiovolume_steamtype) - 1;
++
++    if (dMaxStepIndex > CUSTOM_AUDIO_MAX_VOLUME_STEP - 1) {
++        ALOGE("%s %d Error : dMaxStepIndex = %d",__FUNCTION__,__LINE__,dMaxStepIndex);
++        dMaxStepIndex = CUSTOM_AUDIO_MAX_VOLUME_STEP - 1;
++    } else if (dMaxStepIndex < 0) {
++        ALOGE("%s %d Error : dMaxStepIndex = %d",__FUNCTION__,__LINE__,dMaxStepIndex);
++        dMaxStepIndex = 0;
++    }
++
++    volmax =mAudioCustVolumeTable.audiovolume_steamtype[audiovolume_steamtype][custom_vol_device_mode][dMaxStepIndex];
++    volmin = mAudioCustVolumeTable.audiovolume_steamtype[audiovolume_steamtype][custom_vol_device_mode][0];
++    MTK_ALOGVV("%s audiovolume_steamtype %d custom_vol_device_mode %d stream %d", __FUNCTION__, audiovolume_steamtype, custom_vol_device_mode, audiovolume_steamtype);
++    MTK_ALOGVV("%s getStreamMaxLevels(stream) %d volmax %d volmin %d volInt %f index %d", __FUNCTION__, getStreamMaxLevels(audiovolume_steamtype), volmax, volmin, volInt, index);
++    volume = mapVoltoCustomVol(mAudioCustVolumeTable.audiovolume_steamtype[audiovolume_steamtype][custom_vol_device_mode], volmin, volmax,volInt, audiovolume_steamtype);
++
++    volume = linearToLog(volInt);
++    ALOGV("stream = %d after computeCustomVolume , volInt = %f volume = %f volmin = %d volmax = %d", audiovolume_steamtype, volInt, volume, volmin, volmax);
++    return volume;
++}
++
++void AudioPolicyManager::LoadCustomVolume()
++{
++    ALOGD("LoadCustomVolume Audio_Ver1_Custom_Volume");
++    //android::GetVolumeVer1ParamFromNV(&Audio_Ver1_Custom_Volume);
++
++    mAudioCustVolumeTable.bRev = CUSTOM_VOLUME_REV_1;
++    mAudioCustVolumeTable.bReady = 0;
++
++    MTK_ALOGVV("Before Update");
++    for (int i=0;i<CUSTOM_NUM_OF_VOL_TYPE;i++) {
++        MTK_ALOGVV("StreamType %d",i);
++        for (int j=0;j<CUSTOM_NUM_OF_VOL_MODE;j++) {
++            MTK_ALOGVV("DeviceType %d",j);
++            for (int k=0;k<CUSTOM_AUDIO_MAX_VOLUME_STEP;k++) {
++                MTK_ALOGVV("[IDX]:[Value] %d,%d",k,mAudioCustVolumeTable.audiovolume_steamtype[i][j][k]);
++            }
++        }
++    }
++    mpClientInterface->getCustomAudioVolume(&mAudioCustVolumeTable);
++    if (mAudioCustVolumeTable.bReady!=0) {
++        ALOGD("mUseCustomVolume true");
++        mAudioPolicyVendorControl.setCustomVolumeStatus(true);
++    } else {
++        ALOGD("mUseCustomVolume false");
++    }
++    MTK_ALOGVV("After Update");
++    for (int i=0;i<CUSTOM_NUM_OF_VOL_TYPE;i++) {
++        MTK_ALOGVV("StreamType %d",i);
++        for (int j=0;j<CUSTOM_NUM_OF_VOL_MODE;j++) {
++            MTK_ALOGVV("DeviceType %d",j);
++            for (int k=0;k<CUSTOM_AUDIO_MAX_VOLUME_STEP;k++) {
++                MTK_ALOGVV("[IDX]:[Value] %d,%d",k,mAudioCustVolumeTable.audiovolume_steamtype[i][j][k]);
++            }
++        }
++    }
++
++}
++// zormax add end
+ 
+ }; // namespace android
+diff --git a/services/audiopolicy/managerdefault/AudioPolicyManager.h b/services/audiopolicy/managerdefault/AudioPolicyManager.h
+index 78f9e65..c504a96 100644
+--- a/services/audiopolicy/managerdefault/AudioPolicyManager.h
++++ b/services/audiopolicy/managerdefault/AudioPolicyManager.h
+@@ -62,6 +62,11 @@
+ #include <SoundTriggerSession.h>
+ #include <SessionRoute.h>
+ #include <VolumeCurve.h>
++// zormax add
++#include <AudioPolicyVendorControl.h>
++#include <utils/threads.h>
++#include <AudioCustParam.h>
++#include <AudioCustomVolume.h>
+ 
+ namespace android {
+ 
+@@ -216,6 +221,8 @@ public:
+         virtual status_t dump(int fd);
+ 
+         virtual bool isOffloadSupported(const audio_offload_info_t& offloadInfo);
++        // zormax add
++        virtual status_t SetPolicyManagerParameters(int par1,int par2 ,int par3,int par4) ;
+ 
+         virtual status_t listAudioPorts(audio_port_role_t role,
+                                         audio_port_type_t type,
+@@ -294,6 +301,11 @@ protected:
+         {
+             return mDefaultOutputDevice;
+         }
++        // zormax add
++        virtual AudioPolicyVendorControl &getAudioPolicyVendorControl()
++        {
++            return mAudioPolicyVendorControl;
++        }
+ protected:
+         void addOutput(audio_io_handle_t output, sp<SwAudioOutputDescriptor> outputDesc);
+         void removeOutput(audio_io_handle_t output);
+@@ -607,6 +619,10 @@ protected:
+ 
+         // Audio Policy Engine Interface.
+         AudioPolicyManagerInterface *mEngine;
++		// zormax add
++        AudioPolicyVendorControl mAudioPolicyVendorControl;
++        void LoadCustomVolume(void);
++
+ private:
+         // Add or remove AC3 DTS encodings based on user preferences.
+         void filterSurroundFormats(FormatVector *formatsPtr);
+@@ -680,6 +696,19 @@ protected:
+ #include "DolbyAudioPolicy.h"
+         DolbyAudioPolicy mDolbyAudioPolicy;
+ #endif // DOLBY_END
++
++// zormax add
++private:
++        float linearToLog(int volume);
++        int logToLinear(float volume);
++        int mapVol(float &vol, float unitstep);
++        int mapping_Voice_vol(float &vol, float unitstep);
++        float computeCustomVolume(int stream, int index, audio_devices_t device);
++        int getStreamMaxLevels(int  stream);
++            float mapVoiceVoltoCustomVol(unsigned char array[], int volmin, int volmax, float &vol, int vol_stream_type);
++        float mapVoltoCustomVol(unsigned char array[], int volmin, int volmax,float &vol , int stream);
++		AUDIO_CUSTOM_VOLUME_STRUCT mAudioCustVolumeTable;
++
+ };
+ 
+ };
+diff --git a/services/audiopolicy/service/AudioPolicyClientImpl.cpp b/services/audiopolicy/service/AudioPolicyClientImpl.cpp
+index e0d977a..5d0a0fe 100644
+--- a/services/audiopolicy/service/AudioPolicyClientImpl.cpp
++++ b/services/audiopolicy/service/AudioPolicyClientImpl.cpp
+@@ -239,5 +239,14 @@ audio_unique_id_t AudioPolicyService::AudioPolicyClient::newAudioUniqueId(audio_
+ {
+     return AudioSystem::newAudioUniqueId(use);
+ }
++// zormax add
++status_t AudioPolicyService::AudioPolicyClient::getCustomAudioVolume(void* pCustomVol)
++{
++#ifdef MTK_HARDWARE
++    return mAudioPolicyService->getCustomAudioVolume(pCustomVol);
++#else
++    return INVALID_OPERATION;
++#endif
++}
+ 
+ }; // namespace android
+diff --git a/services/audiopolicy/service/AudioPolicyInterfaceImpl.cpp b/services/audiopolicy/service/AudioPolicyInterfaceImpl.cpp
+index ed8683c..cfeb973 100644
+--- a/services/audiopolicy/service/AudioPolicyInterfaceImpl.cpp
++++ b/services/audiopolicy/service/AudioPolicyInterfaceImpl.cpp
+@@ -775,6 +775,20 @@ status_t AudioPolicyService::getMasterMono(bool *mono)
+     Mutex::Autolock _l(mLock);
+     return mAudioPolicyManager->getMasterMono(mono);
+ }
++// zormax add
++status_t AudioPolicyService::SetPolicyManagerParameters(int par1, int par2, int par3, int par4)
++{
++#ifdef MTK_HARDWARE
++    Mutex::Autolock _l(mLock);
++    if (mAudioPolicyManager == NULL) {
++        return NO_INIT;
++    }
++    return mAudioPolicyManager->SetPolicyManagerParameters(par1, par2, par3, par4);
++#else
++    return 0;
++#endif
++
++}
+ 
+ status_t AudioPolicyService::listAudioSessions(audio_stream_type_t streams,
+                                                Vector< sp<AudioSessionInfo>> &sessions)
+diff --git a/services/audiopolicy/service/AudioPolicyService.cpp b/services/audiopolicy/service/AudioPolicyService.cpp
+index 2b3ed26..b7d192f 100644
+--- a/services/audiopolicy/service/AudioPolicyService.cpp
++++ b/services/audiopolicy/service/AudioPolicyService.cpp
+@@ -41,6 +41,8 @@
+ #include <system/audio.h>
+ #include <system/audio_policy.h>
+ #include <hardware/audio_policy.h>
++// zormax add
++#include <AudioPolicyParameters.h>
+ 
+ namespace android {
+ 
+@@ -58,6 +60,38 @@ namespace {
+ };
+ #endif
+ 
++// zormax start
++status_t AudioPolicyService::getCustomAudioVolume(void* pCustomVol)
++{
++#ifdef MTK_HARDWARE
++    return mAudioCommandThread->getCustomAudioVolumeCommand(pCustomVol);
++#else
++    return INVALID_OPERATION;
++#endif
++}
++
++status_t     AudioPolicyService::AudioCommandThread::getCustomAudioVolumeCommand(void* pCustomVol)
++{
++#ifdef MTK_HARDWARE
++    status_t status = NO_ERROR;
++    sp<AudioCommand> command = new AudioCommand();
++    command->mCommand = GET_CUSTOM_AUDIO_VOLUME;
++
++    GetCustomAudioVolumeData *data = new GetCustomAudioVolumeData();
++    memcpy(&(data->mVolConfig),pCustomVol,sizeof(AUDIO_CUSTOM_VOLUME_STRUCT));
++    command->mParam = data;
++    command->mWaitStatus = true;
++    ALOGD("AudioCommandThread() adding set getCustomAudioVolume");
++    status = sendCommand(command);
++    if (status == NO_ERROR) {
++        memcpy(pCustomVol,&(data->mVolConfig),sizeof(AUDIO_CUSTOM_VOLUME_STRUCT));
++    }
++    return status;
++#else
++    return INVALID_OPERATION;
++#endif
++}
++// zormax end
+ // ----------------------------------------------------------------------------
+ 
+ AudioPolicyService::AudioPolicyService()
+@@ -94,7 +128,7 @@ void AudioPolicyService::onFirstRef()
+         }
+ 
+         rc = mpAudioPolicyDev->create_audio_policy(mpAudioPolicyDev, &aps_ops, this,
+-                                                   &mpAudioPolicy);
++                                                   /*<zormax_add*/(struct audio_policy **)/*zormax_add>*/&mpAudioPolicy);
+         ALOGE_IF(rc, "couldn't create audio policy (%s)", strerror(-rc));
+         if (rc) {
+             return;
+@@ -661,6 +695,20 @@ bool AudioPolicyService::AudioCommandThread::threadLoop()
+                     mLock.lock();
+                     } break;
+ 
++// zormax add
++#ifdef MTK_HARDWARE
++                case GET_CUSTOM_AUDIO_VOLUME: {
++                    GetCustomAudioVolumeData *data = (GetCustomAudioVolumeData *)command->mParam.get();
++                    ALOGV("AudioCommandThread() processing GET_CUSTOM_AUDIO_VOLUME");
++                    sp<IAudioFlinger> af = AudioSystem::get_audio_flinger();
++                    if (af == 0) {
++                        command->mStatus = PERMISSION_DENIED;
++                    } else {
++                        command->mStatus = af->GetAudioData(GET_AUDIO_POLICY_VOL_FROM_VER1_DATA,sizeof(AUDIO_CUSTOM_VOLUME_STRUCT),&(data->mVolConfig));
++                    }
++                    ALOGV("-AudioCommandThread %d",command->mCommand);
++                    } break;
++#endif
+                 default:
+                     ALOGW("AudioCommandThread() unknown command %d", command->mCommand);
+                 }
+diff --git a/services/audiopolicy/service/AudioPolicyService.h b/services/audiopolicy/service/AudioPolicyService.h
+index fec95cc..c198dbb 100644
+--- a/services/audiopolicy/service/AudioPolicyService.h
++++ b/services/audiopolicy/service/AudioPolicyService.h
+@@ -37,6 +37,8 @@
+ #include "AudioPolicyEffects.h"
+ #include "managerdefault/AudioPolicyManager.h"
+ 
++// zormax add
++#include <audio_policy_mtk.h>
+ 
+ namespace android {
+ 
+@@ -136,6 +138,10 @@ public:
+     virtual bool isStreamActive(audio_stream_type_t stream, uint32_t inPastMs = 0) const;
+     virtual bool isStreamActiveRemotely(audio_stream_type_t stream, uint32_t inPastMs = 0) const;
+     virtual bool isSourceActive(audio_source_t source) const;
++    // zormax add
++    virtual status_t SetPolicyManagerParameters(int par1, int par2, int par3, int par4);
++    virtual status_t getCustomAudioVolume(void* pCustomVol);
++
+ 
+     virtual status_t queryDefaultPreProcessing(audio_session_t audioSession,
+                                               effect_descriptor_t *descriptors,
+@@ -279,6 +285,8 @@ private:
+             DYN_POLICY_MIX_STATE_UPDATE,
+             RECORDING_CONFIGURATION_UPDATE,
+             EFFECT_SESSION_UPDATE,
++// zormax add
++            GET_CUSTOM_AUDIO_VOLUME,
+         };
+ 
+         AudioCommandThread (String8 name, const wp<AudioPolicyService>& service);
+@@ -329,6 +337,8 @@ private:
+                     void        insertCommand_l(AudioCommand *command, int delayMs = 0);
+                     void        effectSessionUpdateCommand(sp<AudioSessionInfo>& info, bool added);
+ 
++					// zormax add
++                    status_t    getCustomAudioVolumeCommand(void* pCustomVol);
+     private:
+         class AudioCommandData;
+ 
+@@ -440,6 +450,11 @@ private:
+             bool mAdded;
+         };
+ 
++		// zormax add
++        class GetCustomAudioVolumeData : public AudioCommandData {
++        public:
++            AUDIO_CUSTOM_VOLUME_STRUCT mVolConfig;
++        };
+         Mutex   mLock;
+         Condition mWaitWorkCV;
+         Vector < sp<AudioCommand> > mAudioCommands; // list of pending commands
+@@ -555,6 +570,8 @@ private:
+ 
+         virtual void onOutputSessionEffectsUpdate(sp<AudioSessionInfo>& info, bool added);
+ 
++		// zormax add
++        virtual status_t getCustomAudioVolume(void* pCustomVol);
+ 
+      private:
+         AudioPolicyService *mAudioPolicyService;
+@@ -607,7 +624,12 @@ private:
+     sp<AudioCommandThread> mTonePlaybackThread;     // tone playback thread
+     sp<AudioCommandThread> mOutputCommandThread;    // process stop and release output
+     struct audio_policy_device *mpAudioPolicyDev;
++#if 0 // zormax add, replace it with audio_policy_mtk
+     struct audio_policy *mpAudioPolicy;
++#endif
++//<zormax_add
++    struct audio_policy_mtk *mpAudioPolicy;
++//zormax_add>
+     AudioPolicyInterface *mAudioPolicyManager;
+     AudioPolicyClient *mAudioPolicyClient;
+ 

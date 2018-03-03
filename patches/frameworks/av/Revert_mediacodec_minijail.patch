@@ -1,0 +1,26 @@
+diff --git a/services/mediacodec/minijail/Android.mk b/services/mediacodec/minijail/Android.mk
+index c8c9225..0c26105 100644
+--- a/services/mediacodec/minijail/Android.mk
++++ b/services/mediacodec/minijail/Android.mk
+@@ -21,7 +21,7 @@ ifneq (,$(wildcard $(BOARD_SECCOMP_POLICY)/mediacodec-seccomp.policy))
+     LOCAL_SRC_FILES += $(BOARD_SECCOMP_POLICY)/mediacodec-seccomp.policy
+ endif
+ 
+-include $(BUILD_SYSTEM)/base_rules.mk
++#include $(BUILD_SYSTEM)/base_rules.mk
+ 
+ $(LOCAL_BUILT_MODULE): $(LOCAL_SRC_FILES)
+ 	@mkdir -p $(dir $@)
+diff --git a/services/mediaextractor/minijail/Android.mk b/services/mediaextractor/minijail/Android.mk
+index 92b2598..fde8d05 100644
+--- a/services/mediaextractor/minijail/Android.mk
++++ b/services/mediaextractor/minijail/Android.mk
+@@ -22,7 +22,7 @@ ifneq (,$(wildcard $(BOARD_SECCOMP_POLICY)/mediaextractor-seccomp.policy))
+     LOCAL_SRC_FILES += $(BOARD_SECCOMP_POLICY)/mediaextractor-seccomp.policy
+ endif
+ 
+-include $(BUILD_SYSTEM)/base_rules.mk
++#include $(BUILD_SYSTEM)/base_rules.mk
+ 
+ $(LOCAL_BUILT_MODULE): $(LOCAL_SRC_FILES)
+ 	@mkdir -p $(dir $@)

@@ -1,0 +1,26 @@
+From 9f5132bd17a96f3bcbebc44f72b7702f0fd4fd90 Mon Sep 17 00:00:00 2001
+From: DeckerSU <support@decker.su>
+Date: Fri, 27 Jan 2017 06:20:56 +0300
+Subject: [PATCH] fix fm radio power up (mt6737m, ,mt6627 chip)
+
+Change-Id: Icc454ab6cd92c258f2a04f9c5f7b2f81bc7ab607
+---
+ jni/fmr/libfm_jni.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/jni/fmr/libfm_jni.cpp b/jni/fmr/libfm_jni.cpp
+index a906887..f423e16 100644
+--- a/jni/fmr/libfm_jni.cpp
++++ b/jni/fmr/libfm_jni.cpp
+@@ -51,7 +51,7 @@ jboolean powerUp(JNIEnv *env, jobject thiz, jfloat freq)
+     int tmp_freq;
+ 
+     LOGI("%s, [freq=%d]\n", __func__, (int)freq);
+-    tmp_freq = (int)(freq * 10);        //Eg, 87.5 * 10 --> 875
++    tmp_freq = (int)(freq * 100);        // fix by Decker
+     ret = FMR_pwr_up(g_idx, tmp_freq);
+ 
+     LOGD("%s, [ret=%d]\n", __func__, ret);
+-- 
+2.7.4
+
