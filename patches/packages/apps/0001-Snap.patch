@@ -1,0 +1,26 @@
+From 7f4ad58044d9c4253b7b8c84a90fef02d38a8240 Mon Sep 17 00:00:00 2001
+From: Codecreator <info@codecreator.com>
+Date: Sat, 30 Dec 2017 21:59:24 +0000
+Subject: [PATCH] Snap
+
+---
+ src/com/android/camera/DisableCameraReceiver.java | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/com/android/camera/DisableCameraReceiver.java b/src/com/android/camera/DisableCameraReceiver.java
+index 4cef85f..1ec7167 100644
+--- a/src/com/android/camera/DisableCameraReceiver.java
++++ b/src/com/android/camera/DisableCameraReceiver.java
+@@ -44,7 +44,8 @@ public class DisableCameraReceiver extends BroadcastReceiver {
+         if (!needCameraActivity) {
+             Log.i(TAG, "disable all camera activities");
+             for (int i = 0; i < ACTIVITIES.length; i++) {
+-                disableComponent(context, ACTIVITIES[i]);
++               // disableComponent(context, ACTIVITIES[i]);
++                disableComponent(context, "com.android.camera.DisableCameraReceiver");
+             }
+         }
+ 
+-- 
+2.7.4
+

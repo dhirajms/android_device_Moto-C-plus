@@ -1,3 +1,12 @@
+From f801b5335df28dbedf86e58597efb79e2b96b6c3 Mon Sep 17 00:00:00 2001
+From: Codecreator <info@codecreator.com>
+Date: Sat, 30 Dec 2017 21:26:09 +0000
+Subject: [PATCH] Maintainer Name
+
+---
+ res/xml/device_info_settings.xml | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
 diff --git a/res/xml/device_info_settings.xml b/res/xml/device_info_settings.xml
 index e0d0c21..e60a884 100644
 --- a/res/xml/device_info_settings.xml
@@ -15,3 +24,6 @@ index e0d0c21..e60a884 100644
          <!-- Device Kernel version -->
          <com.android.settings.DividerPreference
                  android:key="kernel_version"
+-- 
+2.7.4
+
