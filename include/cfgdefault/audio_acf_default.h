@@ -95,7 +95,7 @@
  * $Log:$
  *
  * 04 22 2013 kh.hung
- * [ALPS00580843] [MT6572tdv1_phone[lca]][music][Symbio][Free test] ­µ?¼½©ñ¾¹¼½©ñ­µ?ªº?­µ?¤j?¤p¡A¤£?©w
+ * [ALPS00580843] [MT6572tdv1_phone[lca]][music][Symbio][Free test] Â­Âµ?Å’Å“Â©Ã±Å¸Â¹Å’Å“Â©Ã±Â­Âµ?ÂªÂº?Â­Âµ?â‚¬j?â‚¬pÂ¡Aâ‚¬Â£?Â©w
  * Use default DRC setting.
  * 
  * Review: http://mtksap20:8080/go?page=NewReview&reviewid=59367
