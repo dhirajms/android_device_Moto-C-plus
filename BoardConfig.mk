@@ -2,6 +2,8 @@ TARGET_SPECIFIC_HEADER_PATH := device/moto/panelli/include
 
 TARGET_BOARD_PLATFORM := mt6737m
 
+FORCE_32_BIT := true
+
 # Architecture
 ifeq ($(FORCE_32_BIT),true)
 TARGET_ARCH := arm
