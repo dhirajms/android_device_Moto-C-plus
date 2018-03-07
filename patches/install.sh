@@ -2,13 +2,13 @@ echo $1
 rootdirectory="$PWD"
 # ---------------------------------
 
-dirs="frameworks/av frameworks/base frameworks/native system/netd system/core system/bt packages/apps/Settings packages/apps/Snap"
+dirs="frameworks/av frameworks/base frameworks/native system/core system/netd"
 
 for dir in $dirs ; do
 	cd $rootdirectory
 	cd $dir
 	echo "Applying $dir patches..."
-	git apply $rootdirectory/device/moto/panelli/patches/$dir/*.patch
+	git am $rootdirectory/device/moto/panelli/patches/$dir/*.patch
 	echo " "
 done
 
