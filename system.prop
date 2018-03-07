@@ -1,128 +1,39 @@
-#
-# system.prop for mt6737m
-#
+# Platform
 ro.hardware=mt6735
 ro.board.platform=mt6737m
-service.adb.root=1
-persist.sys.root_access=0
-
-# Wifi
-ro.mediatek.wlan.wsc=1
-ro.mediatek.wlan.p2p=1
-mediatek.wlan.ctia=0
-wifi.tethering.interface=ap0
-wifi.interface=wlan0
-wifi.direct.interface=p2p0
-#
-ro.sf.lcd_density=320
-persist.sys.lcd_density=320
-
-ro.opengles.version=196609
-
-# USB MTP WHQL
-ro.sys.usb.mtp.whql.enable=0
-
-# Power off opt in IPO
-sys.ipo.pwrdncap=2
-
-# Tethering
-net.tethering.noprovisioning=true
-
-ro.sys.usb.storage.type=mtp,adb
-ro.vold.umsdirtyratio=20
-
-# USB BICR function
-ro.sys.usb.bicr=no
-
-# USB Charge only function
-ro.sys.usb.charging.only=yes
-
-# audio
-ro.camera.sound.forced=0
-ro.audio.silent=0
-
-ro.zygote.preload.enable=0
-
-persist.sys.strictmode.visual=0
-persist.sys.strictmode.disable=1
-ro.boot.selinux=disable
-
-# Disable dirty region for Mali
-debug.hwui.render_dirty_regions=false
-ro.hardware.egl=mali
-
-# performance
-#ro.mtk_perf_simple_start_win=1
-#ro.mtk_perf_fast_start_win=1
-#ro.mtk_perf_response_time=1
-
 ro.mediatek.chip_ver=S01
-ro.mediatek.version.release=alps-mp-n0.mp1-V1.0.2_gr6737m.35.le.n_P74
+ro.mediatek.version.release=alps-mp-n0.mp1-V1.0.2_droi6737m.35g.n_P2
 ro.mediatek.version.branch=alps-mp-n0.mp1
 ro.mediatek.platform=MT6737M
-ro.mediatek.version.sdk=4
+
+# Bluetooth/Wifi
 persist.mtk.wcn.combo.chipid=0x0335
 persist.mtk.wcn.patch.version=-1
 persist.mtk.wcn.fwlog.status=0
 persist.mtk.wcn.dynamic.dump=0
 service.wcn.driver.ready=no
-ro.sf.hwrotation=0
-persist.sys.scrollingcache=2
-#touch.size.calibration=geometric
-#touch.size.scale=100
-#touch.pressure.calibration=amplitude
-#touch.pressure.scale=0.1
 
-# temporary enables NAV bar (soft keys)
-qemu.hw.mainkeys=1
-
-mediatek.wlan.chip=CONSYS_MT6735
-mediatek.wlan.module.postfix=_consys_mt6735
-##
-
-ro.mtk_gps_support=1
-persist.mtk.combo.coredump=no
+# DRM
 drm.service.enabled=true
-fmradio.driver.enable=1
-ro.mtk_audio_tuning_tool_ver=V1
-ro.mtk_audenh_support=1
-ro.mtk_fm_recording_support=1
-ro.mtk_dual_mic_support=1
-ro.mtk_perfservice_support=1
-ro.mtk_bt_support=1
-ro.mtk_bsp_package=1
-#ro.mtk_pq_support=2
-#ro.mtk_pq_color_mode=1
+
+# OMX (libMtkOmxVdecEx.so)
 wfd.dummy.enable=1
 mtk.vdec.waitkeyframeforplay=1
-ro.media.maxmem=500000000
-#ro.mtk_deinterlace_support=1
-ro.nxpnfc.feature=1
-mdc_initial_max_retry=10
 
-# Telephony
+# RIL
+mdc_initial_max_retry=10
 rild.libpath=mtk-ril.so
 rild.libargs=-d /dev/ttyC0
 ro.telephony.ril_class=MT6735
 ro.telephony.ril.config=fakeiccid
-#ro.telephony.ril.config=signalstrength
-ro.telephony.sim.count=2
-persist.radio.default.sim=0
 persist.radio.mobile.data=0,0
-persist.radio.multisim.config=dsds
-bgw.current3gband=0
-ril.current.share_modem=2
 ril.external.md=0
+ril.current.share_modem=2
 ril.telephony.mode=0
 persist.radio.fd.counter=150
 persist.radio.fd.off.counter=50
 persist.radio.fd.r8.counter=150
 persist.radio.fd.off.r8.counter=50
-ro.mtk_gemini_support=1
-persist.gemini.sim_num=2
-ro.gemini.smart_sim_switch=false
-ro.com.android.mobiledata=false
-ro.mtk_lte_support=1
 ro.boot.opt_lte_support=1
 ro.boot.opt_c2k_lte_mode=0
 ro.boot.opt_md1_support=5
@@ -133,11 +44,25 @@ persist.radio.mtk_ps3_rat=G
 ro.mtk_md_sbp_custom_value=0
 ro.mtk_world_phone_policy=0
 ro.mtk_enable_md1=1
-ro.mtk_fd_support=1
 ro.num_md_protocol=2
 ro.mtk_protocol1_rat_config=Lf/Lt/W/G
-ro.longcheer.sku=EMEA
-ro.longcheer.simsum=2
-ro.longcheer.thermal=1
 ro.boot.opt_eccci_c2k=0
+
+# Tethering
+net.tethering.noprovisioning=true
+
+# Wifi
+wifi.interface=wlan0
+wifi.direct.interface=p2p0
+
+# Graphics
+ro.opengles.version=196609
+
+# Graphics
+ro.sf.lcd_density=320
+
+# Tethering
+wifi.tethering.interface=ap0
+
 ro.telephony.default_network=20,20
+
