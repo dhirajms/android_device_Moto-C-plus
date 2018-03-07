@@ -1,26 +1,50 @@
-# inherit from the proprietary version
--include vendor/moto/panelli/BoardConfigVendor.mk
+TARGET_SPECIFIC_HEADER_PATH := device/moto/panelli/include
 
-# Architecture
-FORCE_32_BIT := true
-
-# Platform
 TARGET_BOARD_PLATFORM := mt6737m
-TARGET_NO_BOOTLOADER := true
 
 # Architecture
+ifeq ($(FORCE_32_BIT),true)
 TARGET_ARCH := arm
 TARGET_ARCH_VARIANT := armv7-a-neon
 TARGET_CPU_ABI := armeabi-v7a
 TARGET_CPU_ABI2 := armeabi
 TARGET_CPU_VARIANT := cortex-a53
+else
+TARGET_ARCH := arm64
+TARGET_ARCH_VARIANT := armv8-a
+TARGET_CPU_ABI := arm64-v8a
+TARGET_CPU_ABI2 :=
+TARGET_CPU_VARIANT := cortex-a53
+
+TARGET_2ND_ARCH := arm
+TARGET_2ND_ARCH_VARIANT := armv7-a-neon
+TARGET_2ND_CPU_ABI := armeabi-v7a
+TARGET_2ND_CPU_ABI2 := armeabi
+TARGET_2ND_CPU_VARIANT := cortex-a53
+endif
+
+# make_ext4fs requires numbers in dec format
+BOARD_BOOTIMAGE_PARTITION_SIZE := 16777216
+BOARD_RECOVERYIMAGE_PARTITION_SIZE := 16777216
+BOARD_CACHEIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_CACHEIMAGE_PARTITION_SIZE := 419430400
+BOARD_SYSTEMIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_SYSTEMIMAGE_PARTITION_SIZE := 1887436800
+BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_USERDATAIMAGE_PARTITION_SIZE := 4698144768
+BOARD_FLASH_BLOCK_SIZE := 131072
+
+# system proprities
+TARGET_SYSTEM_PROP += device/moto/panelli/system.prop
+
+# FSTAB
+TARGET_RECOVERY_FSTAB := device/moto/panelli/rootdir/fstab.mt6735
+
+# Audio
+BOARD_USES_MTK_AUDIO := true
 
 # Bootloader
-TARGET_BOOTLOADER_BOARD_NAME := mt6737m
-
-# Recovery
-TARGET_USERIMAGES_USE_EXT4 := true
-BOARD_CACHEIMAGE_FILE_SYSTEM_TYPE := ext4
+TARGET_NO_BOOTLOADER := true
 
 # Kernel
 BOARD_KERNEL_IMAGE_NAME := zImage-dtb
@@ -40,67 +64,60 @@ BOARD_MKBOOTIMG_ARGS := --kernel_offset $(BOARD_KERNEL_OFFSET) --ramdisk_offset 
 #KERNEL_TOOLCHAIN := $(ANDROID_BUILD_TOP)/prebuilts/gcc/$(HOST_OS)-x86/arm/arm-eabi-4.8/bin
 #TARGET_KERNEL_CROSS_COMPILE_PREFIX := arm-eabi-
 
-# make_ext4fs requires numbers in dec format
-BOARD_BOOTIMAGE_PARTITION_SIZE := 16777216 
-BOARD_RECOVERYIMAGE_PARTITION_SIZE := 16777216 
-BOARD_SYSTEMIMAGE_PARTITION_SIZE := 2432696320
-BOARD_USERDATAIMAGE_PARTITION_SIZE := 4698144768
-BOARD_CACHEIMAGE_PARTITION_SIZE := 419430400
-BOARD_FLASH_BLOCK_SIZE := 131072
-TARGET_KMODULES := true
+#bootloader
+TARGET_BOOTLOADER_BOARD_NAME := mt6737m
 
 # Assert
 #rip ported recoveries
-TARGET_OTA_ASSERT_DEVICE := Moto,"panelli",panelli,Moto_C,Moto C,C,Moto C Plus,Moto_C_plus,namath
+TARGET_OTA_ASSERT_DEVICE := Moto,"panelli",panelli,Moto_C,Moto C,C,Moto C Plus,Moto_C_plus
 
-# Disable memcpy opt (for audio libraries)
-TARGET_CPU_MEMCPY_OPT_DISABLE := true
+# Bluetooth
+BOARD_HAVE_BLUETOOTH := true
+# BOARD_BLUETOOTH_BDROID_HCILP_INCLUDED := 0
 
-# Flags
-BOARD_GLOBAL_CFLAGS += -DNO_SECURE_DISCARD
-BOARD_GLOBAL_CFLAGS += -DDISABLE_HW_ID_MATCH_CHECK
+# CMHW
+BOARD_USES_CYANOGEN_HARDWARE := true
+BOARD_HARDWARE_CLASS += device/moto/panelli/cmhw
 
-# Graphics
-BOARD_EGL_CFG := /vendor/moto/panelli/proprietary/vendor/lib/egl/egl.cfg
-BOARD_EGL_WORKAROUND_BUG_10194508 := true
+ifeq ($(HOST_OS),linux)
+  ifeq ($(TARGET_BUILD_VARIANT),user)
+		WITH_DEXPREOPT ?= true
+  endif
+endif
+
+# Display
 USE_OPENGL_RENDERER := true
 NUM_FRAMEBUFFER_SURFACE_BUFFERS := 3
 TARGET_RUNNING_WITHOUT_SYNC_FRAMEWORK := true
 TARGET_FORCE_HWC_FOR_VIRTUAL_DISPLAYS := true
+PRESENT_TIME_OFFSET_FROM_VSYNC_NS := 0
 MTK_HWC_SUPPORT := yes
-MTK_HWC_VERSION := 1.4.1
-MTK_GPU_VERSION := mali midgard r12p1
+MTK_HWC_VERSION := 1.5.0
+OVERRIDE_RS_DRIVER := libRSDriver_mtk.so
 
 # Mediatek support
 BOARD_USES_MTK_HARDWARE := true
+TARGET_LDPRELOAD += libmtk_symbols.so
 
-# Camera
-USE_CAMERA_STUB := true
-
-# Boot animation
-TARGET_BOOTANIMATION_MULTITHREAD_DECODE := true
-TARGET_BOOTANIMATION_TEXTURE_CACHE := true
-
-# Audio
-BOARD_USES_MTK_AUDIO := true
-
-# CMHW
-BOARD_USES_CYANOGEN_HARDWARE := true
-BOARD_HARDWARE_CLASS := device/moto/panelli/cmhw
-
-# Fix video autoscaling on old OMX decoders
+# Media
 TARGET_OMX_LEGACY_RESCALING := true
 
-# Charger
-BACKLIGHT_PATH := /sys/class/leds/lcd-backlight/brightness
+# GPS
+BOARD_GPS_LIBRARIES := true
+
+# Recovery
+BOARD_NO_SECURE_DISCARD := true
+TARGET_USERIMAGES_USE_EXT4 := true
 
 # RIL
-BOARD_RIL_CLASS := ../../../device/moto/panelli/ril/
+BOARD_RIL_CLASS := ../../../device/moto/panelli/ril
 
-# GPS
-BOARD_GPS_LIBRARIES :=true
-BOARD_CONNECTIVITY_MODULE := MT6625
-BOARD_MEDIATEK_USES_GPS := true
+# SELinux
+ifeq ($(SELINUX_PERMISSIVE),true)
+BOARD_KERNEL_CMDLINE +=  androidboot.selinux=permissive
+endif
+BOARD_SEPOLICY_DIRS := device/moto/panelli/sepolicy
+BOARD_SECCOMP_POLICY += device/moto/panelli/seccomp
 
 # Wireless
 BOARD_WLAN_DEVICE := MediaTek
@@ -117,68 +134,27 @@ WIFI_DRIVER_STATE_CTRL_PARAM := /dev/wmtWifi
 WIFI_DRIVER_STATE_ON := 1
 WIFI_DRIVER_STATE_OFF := 0
 
-# Enable Minikin text layout engine (will be the default soon)
-USE_MINIKIN := true
-
-# Charger
-BOARD_CHARGER_SHOW_PERCENTAGE := true
-
-# Fonts
+# Misc
 EXTENDED_FONT_FOOTPRINT := true
-
-# Bluetooth
-BOARD_HAVE_BLUETOOTH := true
-BOARD_BLUETOOTH_BDROID_HCILP_INCLUDED := 0
-BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := device/moto/panelli/bluetooth
-
-# Symbols for MediaTek
-TARGET_LDPRELOAD += mtk_symbols.so
-TARGET_LDPRELOAD += libmtk_symbols.so
-
-# CWM
-TARGET_RECOVERY_FSTAB := device/moto/panelli/rootdir/recovery.fstab
-BOARD_HAS_NO_SELECT_BUTTON := true
 
 # TWRP
 ifeq ($(WITH_TWRP),true)
+DEVICE_RESOLUTION := 720x1280
+DEVICE_SCREEN_WIDTH := 720
+DEVICE_SCREEN_HEIGHT := 1280
 TW_THEME := portrait_hdpi
-RECOVERY_GRAPHICS_USE_LINELENGTH := true
-TW_NO_REBOOT_BOOTLOADER := true
+RECOVERY_VARIANT := twrp
+TARGET_RECOVERY_PIXEL_FORMAT := "RGBA_8888"
 TW_BRIGHTNESS_PATH := /sys/devices/platform/leds-mt65xx/leds/lcd-backlight/brightness
-TARGET_USE_CUSTOM_LUN_FILE_PATH := /sys/devices/platform/mt_usb/musb-hdrc.0.auto/gadget/lun%d/file
-TW_CUSTOM_CPU_TEMP_PATH := /sys/devices/virtual/thermal/thermal_zone1/temp
-TW_MAX_BRIGHTNESS := 255
-TW_EXCLUDE_SUPERSU := true
 TW_INCLUDE_FB2PNG := true
-TW_NO_CPU_TEMP := true
-TW_REBOOT_BOOTLOADER := true
-TW_REBOOT_RECOVERY := true
-TW_HAS_DOWNLOAD_MODE := true
-TW_EXCLUDE_SUPERSU := true
+TW_USE_MODEL_HARDWARE_ID_FOR_DEVICE_ID := true
+TW_DEVICE_VERSION := 0
 TW_USE_TOOLBOX := true
 RECOVERY_SDCARD_ON_DATA := true
-TW_INTERNAL_STORAGE_PATH := "/emmc"
-TW_INTERNAL_STORAGE_MOUNT_POINT := "emmc"
-TW_EXTERNAL_STORAGE_PATH := "/external_sd"
-TW_EXTERNAL_STORAGE_MOUNT_POINT := "external_sd"
+TW_INCLUDE_CRYPTO := true
+TW_MAX_BRIGHTNESS := 255
+TW_CUSTOM_CPU_TEMP_PATH := /sys/devices/virtual/thermal/thermal_zone1/temp
+TW_CUSTOM_BATTERY_PATH := "/sys/devices/platform/battery/power_supply/battery"
+TARGET_USE_CUSTOM_LUN_FILE_PATH := /sys/devices/platform/mt_usb/musb-hdrc.0.auto/gadget/lun%d/file
 TW_NO_SCREEN_BLANK := true
 endif
-
-TARGET_SYSTEM_PROP := device/moto/panelli/system.prop
-TARGET_SPECIFIC_HEADER_PATH := device/moto/panelli/include
-TARGET_USE_CUSTOM_LUN_FILE_PATH := /sys/class/android_usb/android0/f_mass_storage/lun/file
-
-ifneq ($(FORCE_32_BIT),yes)
-PRODUCT_DEFAULT_PROPERTY_OVERRIDES += ro.zygote=zygote32
-else
-PRODUCT_COPY_FILES += system/core/rootdir/init.zygote64_32.rc:root/init.zygote64_32.rc
-PRODUCT_DEFAULT_PROPERTY_OVERRIDES += ro.zygote=zygote64_32
-endif
-
-# Selinux Policy
-BOARD_SEPOLICY_DIRS := \
-       device/moto/panelli/sepolicy
-
-# Seccomp filter
-BOARD_SECCOMP_POLICY += device/moto/panelli/seccomp
-
