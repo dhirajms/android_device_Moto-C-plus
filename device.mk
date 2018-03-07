@@ -2,6 +2,8 @@ DEVICE_PATH := device/moto/panelli
 VENDOR_BLOBS ?= vendor/moto/panelli/panelli-vendor.mk
 $(call inherit-product-if-exists, $(VENDOR_BLOBS))
 
+-include vendor/moto/panelli/panelli-vendor.mk
+
 # Kernel
 ifeq ($(TARGET_PREBUILT_KERNEL),)
 	LOCAL_KERNEL := device/moto/panelli/prebuilts/kernel
