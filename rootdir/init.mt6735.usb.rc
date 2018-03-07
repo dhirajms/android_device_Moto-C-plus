@@ -2,14 +2,12 @@ on early-init
    write /sys/module/musb_hdrc/parameters/kernel_init_done 1
 
 on boot
-    ## modify pid&&vid for A158---qiumeng@wind-mobi.com 20161130 begin
-    setprop sys.usb.vid 22B8
-	## modify pid&&vid for A158---qiumeng@wind-mobi.com 20161130 end
-    write /sys/class/android_usb/android0/iManufacturer MediaTek
+    setprop sys.usb.vid ${ro.usb.vid}
+    write /sys/class/android_usb/android0/iManufacturer ${ro.product.manufacturer}
     write /sys/class/android_usb/android0/iProduct ${ro.product.model}
     write /sys/class/android_usb/android0/iSerial ${ro.serialno}
     write /sys/class/android_usb/android0/f_rndis/wceis 1
-    write /sys/class/android_usb/android0/f_rndis/manufacturer MediaTek
+    write /sys/class/android_usb/android0/f_rndis/manufacturer ${ro.product.manufacturer}
     write /sys/class/android_usb/android0/f_rndis/vendorID ${sys.usb.vid}
 
 on fs
@@ -19,7 +17,6 @@ on fs
     write /sys/class/android_usb/android0/f_ffs/aliases adb
     chown system system /sys/class/android_usb/android0/f_acm/port_index
     chmod 0660 /sys/class/android_usb/android0/f_acm/port_index
-
 
 on post-fs-data
     chown radio system /sys/class/usb_rawbulk/data/enable
@@ -96,9 +93,7 @@ on property:sys.usb.config=mass_storage,adb
 on property:sys.usb.config=mtp
     write /sys/class/android_usb/android0/enable 0
     write /sys/class/android_usb/android0/idVendor ${sys.usb.vid}
-	## modify pid&&vid for A158---qiumeng@wind-mobi.com 20161130 begin
     write /sys/class/android_usb/android0/idProduct 2e82
-	## modify pid&&vid for A158---qiumeng@wind-mobi.com 20161130 end
     write /sys/class/android_usb/android0/functions ${sys.usb.config}
     write /sys/class/android_usb/android0/enable 1
     setprop sys.usb.state ${sys.usb.config}
@@ -117,9 +112,7 @@ on property:sys.usb.config=mtp,acm
 on property:sys.usb.config=mtp,adb
     write /sys/class/android_usb/android0/enable 0
     write /sys/class/android_usb/android0/idVendor ${sys.usb.vid}
-	## modify pid&&vid for A158---qiumeng@wind-mobi.com 20161130 begin
     write /sys/class/android_usb/android0/idProduct 2e76
-	## modify pid&&vid for A158---qiumeng@wind-mobi.com 20161130 end
     write /sys/class/android_usb/android0/functions mtp,adb
     write /sys/class/android_usb/android0/enable 1
     start adbd
@@ -159,9 +152,7 @@ on property:sys.usb.config=mtp,mass_storage,adb
 on property:sys.usb.config=ptp
     write /sys/class/android_usb/android0/enable 0
     write /sys/class/android_usb/android0/idVendor ${sys.usb.vid}
-	## modify pid&&vid for A158---qiumeng@wind-mobi.com 20161130 begin
     write /sys/class/android_usb/android0/idProduct 2e83
-	## modify pid&&vid for A158---qiumeng@wind-mobi.com 20161130 end
     write /sys/class/android_usb/android0/functions ${sys.usb.config}
     write /sys/class/android_usb/android0/enable 1
     setprop sys.usb.state ${sys.usb.config}
@@ -180,9 +171,7 @@ on property:sys.usb.config=ptp,acm
 on property:sys.usb.config=ptp,adb
     write /sys/class/android_usb/android0/enable 0
     write /sys/class/android_usb/android0/idVendor ${sys.usb.vid}
-	## modify pid&&vid for A158---qiumeng@wind-mobi.com 20161130 begin
     write /sys/class/android_usb/android0/idProduct 2e84
-	## modify pid&&vid for A158---qiumeng@wind-mobi.com 20161130 end
     write /sys/class/android_usb/android0/functions ${sys.usb.config}
     write /sys/class/android_usb/android0/enable 1
     start adbd
@@ -222,9 +211,7 @@ on property:sys.usb.config=ptp,mass_storage,adb
 on property:sys.usb.config=rndis
     write /sys/class/android_usb/android0/enable 0
     write /sys/class/android_usb/android0/idVendor ${sys.usb.vid}
-	## modify pid&&vid for A158---qiumeng@wind-mobi.com 20161130 begin
     write /sys/class/android_usb/android0/idProduct 2e24
-	## modify pid&&vid for A158---qiumeng@wind-mobi.com 20161130 end
     write /sys/class/android_usb/android0/functions ${sys.usb.config}
     write /sys/class/android_usb/android0/bDeviceClass 224
     write /sys/class/android_usb/android0/enable 1
@@ -244,9 +231,7 @@ on property:sys.usb.config=rndis,acm
 on property:sys.usb.config=rndis,adb
     write /sys/class/android_usb/android0/enable 0
     write /sys/class/android_usb/android0/idVendor ${sys.usb.vid}
-	## modify pid&&vid for A158---qiumeng@wind-mobi.com 20161130 begin
     write /sys/class/android_usb/android0/idProduct 2e25
-	## modify pid&&vid for A158---qiumeng@wind-mobi.com 20161130 end
     write /sys/class/android_usb/android0/functions ${sys.usb.config}
     write /sys/class/android_usb/android0/enable 1
     start adbd

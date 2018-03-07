@@ -1,0 +1,43 @@
+import init.mt6735.usb.rc
+import init.mt6735.power.rc
+
+on post-fs-data
+    # Camera
+    chmod 0660 /dev/MAINAF
+    chmod 0660 /dev/MAINAF2
+    chmod 0660 /dev/SUBAF
+    chmod 0660 /dev/GAF001AF
+    chmod 0660 /dev/DW9714AF
+    chmod 0660 /dev/AD5820AF
+    chmod 0660 /dev/BU64745GWZAF
+
+    chown system camera /dev/MAINAF
+    chown system camera /dev/MAINAF2
+    chown system camera /dev/SUBAF
+    chown system camera /dev/GAF001AF
+    chown system camera /dev/DW9714AF
+    chown system camera /dev/AD5820AF
+    chown system camera /dev/BU64745GWZAF
+
+    # SMB
+    chown system system /proc/smb/ScreenComm
+    chmod 0660 /proc/smb/ScreenComm
+
+    # Define device for ATCID
+    chmod 0660 /dev/ttyGS0
+    chmod 0660 /dev/ttyGS1
+    chown system /dev/ttyGS0
+    chown system /dev/ttyGS1
+
+    chmod 0666 /dev/exm0
+
+on boot
+    # Enable KSM
+    write /sys/kernel/mm/ksm/pages_to_scan 100
+    write /sys/kernel/mm/ksm/sleep_millisecs 500
+
+    # Tune I/O
+    write /sys/block/mmcblk0/queue/add_random 0
+    write /sys/block/mmcblk0/queue/iosched/slice_idle 0
+    write /sys/block/mmcblk0/bdi/read_ahead_kb 128
+
