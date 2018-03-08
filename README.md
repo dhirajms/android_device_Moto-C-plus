@@ -28,7 +28,9 @@ Sensors | Acc only
 - [x] Bluetooth
 - [x] Sensors
 - [x] Hotspot
-- ...
+- [x] Camcorder
+...
 
 ### Not Working:
-- Camcorder
+- 
+ 
