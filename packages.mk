@@ -18,11 +18,11 @@ PRODUCT_PACKAGES += \
     libtinycompress \
     libtinymix \
     libtinyxml
-    
+
 # Mediatek platform
 PRODUCT_PACKAGES += \
     libmtk_symbols
-    
+
 # Power
 PRODUCT_PACKAGES += \
     power.default \
@@ -36,8 +36,8 @@ PRODUCT_PACKAGES += \
     wpa_supplicant \
     wpa_supplicant.conf \
     lib_driver_cmd_mt66xx
-    
-PRODUCT_PACKAGES += \    
+
+PRODUCT_PACKAGES += \
     librs_jni \
     com.android.future.usb.accessory \
     charger \
@@ -45,12 +45,12 @@ PRODUCT_PACKAGES += \
     libnl_2 \
     libion \
     Snap
-    
- # FM
+
+# FM
 PRODUCT_PACKAGES += \
-    libfmjni \   
-    FMRadio 
-    
+    libfmjni \
+    FMRadio
+
 # Radio
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.kernel.android.checkjni=0
