@@ -39,6 +39,9 @@ BOARD_FLASH_BLOCK_SIZE := 131072
 # system proprities
 TARGET_SYSTEM_PROP += device/moto/panelli/system.prop
 
+# Camera
+#USE_CAMERA_STUB := true
+
 # FSTAB
 TARGET_RECOVERY_FSTAB := device/moto/panelli/rootdir/fstab.mt6735
 
@@ -98,6 +101,7 @@ MTK_HWC_VERSION := 1.5.0
 OVERRIDE_RS_DRIVER := libRSDriver_mtk.so
 
 # Mediatek support
+MTK_HARDWARE := true
 BOARD_USES_MTK_HARDWARE := true
 TARGET_LDPRELOAD += libmtk_symbols.so
 

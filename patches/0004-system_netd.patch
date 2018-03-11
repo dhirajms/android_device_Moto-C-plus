@@ -1,14 +1,3 @@
-From e955c77c4207623862a7097120dfedea405c770b Mon Sep 17 00:00:00 2001
-From: darklord4822 <darklord4722@gmail.com>
-Date: Tue, 10 Oct 2017 11:07:03 +0000
-Subject: [PATCH] changes for MTK
-
-Change-Id: I843ebe587806e17699c76f71093d7b1cc3386287
----
- server/NatController.cpp    |  4 +++
- server/SoftapController.cpp | 76 +++++++++++++++++++++++++++++++++++++++------
- 2 files changed, 70 insertions(+), 10 deletions(-)
-
 diff --git a/server/NatController.cpp b/server/NatController.cpp
 index cda8f5f..55467e1 100644
 --- a/server/NatController.cpp
@@ -131,6 +120,3 @@ index 4a7c8d7..c9eb168 100755
  
      std::string fbuf;
      if (argc > 7) {
--- 
-1.9.1
-
