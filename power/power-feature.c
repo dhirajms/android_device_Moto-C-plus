@@ -35,7 +35,7 @@
 #include <hardware/power.h>
 #include "power-feature.h"
 
-#define GESTURE_CONTROL_PATH "/sys/class/droi_gesture/astp"
+#define GESTURE_CONTROL_PATH "/proc/android_touch/SMWP"
 #define DOUBLE_TAP_TO_WAKE_ENABLE_VALUE "1"
 #define DOUBLE_TAP_TO_WAKE_DISABLE_VALUE "0"
 

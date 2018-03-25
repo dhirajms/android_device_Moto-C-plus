@@ -4,26 +4,23 @@
 PRODUCT_RELEASE_NAME := panelli
 
 # Inherit some common CM stuff.
-$(call inherit-product, vendor/cm/config/common_full_phone.mk)
+$(call inherit-product, vendor/lineage/config/common_full_phone.mk)
 
 # Inherit device configuration
-$(call inherit-product, device/moto/panelli/panelli.mk)
+$(call inherit-product, device/moto/panelli/device_panelli.mk)
 
 TARGET_SCREEN_HEIGHT := 1280
 TARGET_SCREEN_WIDTH := 720
 DEVICE_RESOLUTION := 720x1280
 
-# Bootanimation
-TARGET_BOOTANIMATION_PRELOAD := true
-TARGET_BOOTANIMATION_TEXTURE_CACHE := true
-
 # Device identifier. This must come after all inclusions
 PRODUCT_DEVICE := panelli
 PRODUCT_NAME := lineage_panelli
-PRODUCT_BRAND := Moto
+PRODUCT_BRAND := Motorola
 PRODUCT_MODEL := Moto C Plus
 PRODUCT_MANUFACTURER := Motorola
 
-#use magisk
-WITH_MAGISK := true
-ROOT_METHOD := magisk
+PRODUCT_GMS_CLIENTID_BASE := android-motorola
+
+# Available languages
+PRODUCT_LOCALES := en_US en_GB ru_RU uk_UA tr_TR sk_SK vi_VN fr_FR ar_EG

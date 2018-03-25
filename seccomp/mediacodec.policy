@@ -3,7 +3,15 @@
 sched_getparam: 1
 sched_getscheduler: 1
 sched_setaffinity: 1
+pselect6: 1
+eventfd2: 1
+sendto: 1
+recvfrom: 1
+getsockopt: 1
+# ffmpeg needs this
+getdents64: 1
 _llseek: 1
+sysinfo: 1
 fsync: 1
 mlock: 1
 munlock: 1
