@@ -1,141 +1,117 @@
-From bfecbaf9334117e8c11293ab12a7e9a07ceae8b3 Mon Sep 17 00:00:00 2001
+From 81be8fe93150f1472dd82ae808c0bf3984736d46 Mon Sep 17 00:00:00 2001
 From: darklord4822 <darklord4722@gmail.com>
-Date: Sat, 7 Oct 2017 14:16:26 +0000
+Date: Sun, 18 Feb 2018 08:47:59 +0000
 Subject: [PATCH] changes for MTK
 
-Change-Id: I3eeaa80b75e5203d3d8345790dadfbcff8ee2a78
+Change-Id: Ib73e61d5698ad3228c1b41518cf73c497cf2da2e
 ---
- include/netutils/ifc.h      |  15 ++
- init/init.cpp               |   2 +-
- init/init.h                 |   2 +-
- init/service.cpp            |   6 +-
- libcutils/Android.mk        |   5 +-
- libcutils/fs_config.c       |   2 +-
- libcutils/mtk_audioCompat.c |   4 +
- libcutils/mtk_xlog.cpp      |  27 ++++
- libnetutils/ifc_utils.c     | 323 ++++++++++++++++++++++++++++++++++++++++++++
- 9 files changed, 379 insertions(+), 7 deletions(-)
- create mode 100644 libcutils/mtk_audioCompat.c
+ gatekeeperd/Android.mk             |   4 +
+ gatekeeperd/gatekeeperd.cpp        |   4 +
+ init/init.cpp                      |   2 +-
+ init/init.h                        |   2 +-
+ libcutils/Android.bp               |   2 +-
+ libcutils/fs_config.cpp            |   4 +-
+ libcutils/mtk_xlog.cpp             |  27 ++++
+ libnetutils/ifc_utils.c            | 315 +++++++++++++++++++++++++++++++++++++
+ libnetutils/include/netutils/ifc.h |  13 ++
+ 9 files changed, 368 insertions(+), 5 deletions(-)
  create mode 100644 libcutils/mtk_xlog.cpp
 
-diff --git a/include/netutils/ifc.h b/include/netutils/ifc.h
-index 3b27234..03932ab 100644
---- a/include/netutils/ifc.h
-+++ b/include/netutils/ifc.h
-@@ -61,6 +61,21 @@ extern int ifc_configure(const char *ifname, in_addr_t address,
+diff --git a/gatekeeperd/Android.mk b/gatekeeperd/Android.mk
+index 28f0b07..7ba8505 100644
+--- a/gatekeeperd/Android.mk
++++ b/gatekeeperd/Android.mk
+@@ -37,6 +37,10 @@ LOCAL_SHARED_LIBRARIES := \
+ 	libhidltransport \
+ 	libhwbinder \
+ 	android.hardware.gatekeeper@1.0 \
++	
++ifeq ($(strip $(BOARD_USE_SOFT_GATEKEEPER)),true)
++LOCAL_CFLAGS += -DUSE_SOFT_GATEKEEPER
++endif
  
- extern in_addr_t prefixLengthToIpv4Netmask(int prefix_length);
- 
-+#ifdef MTK_HARDWARE
-+extern int ifc_is_up(const char *name, unsigned *isup);
-+extern int ifc_enable_allmc(const char *name);
-+extern int ifc_disable_allmc(const char *name);
-+extern int ifc_reset_connection_by_uid(int uid, int error); 
-+extern int ifc_set_throttle(const char *ifname, int rxKbps, int txKbps);
-+extern int ifc_set_fwmark_rule(const char *ifname, int mark, int add);
-+extern int ifc_set_txq_state(const char *ifname, int state);
-+extern int ifc_ccmni_md_cfg(const char *ifname, int md_id);
-+struct uid_err {
-+    int appuid;
-+	int errorNum;
-+};
+ LOCAL_STATIC_LIBRARIES := libscrypt_static
+ LOCAL_C_INCLUDES := external/scrypt/lib/crypto
+diff --git a/gatekeeperd/gatekeeperd.cpp b/gatekeeperd/gatekeeperd.cpp
+index 61c8804..8e43da9 100644
+--- a/gatekeeperd/gatekeeperd.cpp
++++ b/gatekeeperd/gatekeeperd.cpp
+@@ -57,7 +57,11 @@ class GateKeeperProxy : public BnGateKeeperService {
+ public:
+     GateKeeperProxy() {
+         clear_state_if_needed_done = false;
++#ifdef USE_SOFT_GATEKEEPER
++    	hw_device = nullptr;
++#else
+         hw_device = IGatekeeper::getService();
 +#endif
-+
- __END_DECLS
  
- #endif /* _NETUTILS_IFC_H_ */
+         if (hw_device == nullptr) {
+             ALOGW("falling back to software GateKeeper");
 diff --git a/init/init.cpp b/init/init.cpp
-index 7a37059..f0b0d4f 100755
+index 35fc442..f3814a3 100644
 --- a/init/init.cpp
 +++ b/init/init.cpp
-@@ -85,7 +85,7 @@ int have_console;
- std::string console_name = "/dev/console";
- static time_t process_needs_restart;
+@@ -88,7 +88,7 @@ static char qemu[32];
+ std::string default_console = "/dev/console";
+ static time_t process_needs_restart_at;
  
 -const char *ENV[32];
 +const char *ENV[64];
  
- bool waiting_for_exec = false;
+ static int epoll_fd = -1;
  
 diff --git a/init/init.h b/init/init.h
-index 345d442..f93d0c5 100644
+index aaab523..02ba0f2 100644
 --- a/init/init.h
 +++ b/init/init.h
-@@ -24,7 +24,7 @@ class Service;
- 
- #define COMMAND_RETRY_TIMEOUT 5
- 
+@@ -27,7 +27,7 @@ namespace init {
+ // Note: These globals are *only* valid in init, so they should not be used in ueventd,
+ // watchdogd, or any files that may be included in those, such as devices.cpp and util.cpp.
+ // TODO: Have an Init class and remove all globals.
 -extern const char *ENV[32];
 +extern const char *ENV[64];
- extern bool waiting_for_exec;
- extern int have_console;
- extern std::string console_name;
-diff --git a/init/service.cpp b/init/service.cpp
-index 8127e70..6be06db 100644
---- a/init/service.cpp
-+++ b/init/service.cpp
-@@ -373,9 +373,9 @@ bool Service::Start() {
-         }
-         if (rc == 0 && scon == mycon) {
-             ERROR("Service %s does not have a SELinux domain defined.\n", name_.c_str());
--            free(mycon);
--            free(fcon);
--            return false;
-+            //free(mycon);
-+            //free(fcon);
-+            //return false;
-         }
-         free(mycon);
-         free(fcon);
-diff --git a/libcutils/Android.mk b/libcutils/Android.mk
-index 7a92253..c080b2d 100644
---- a/libcutils/Android.mk
-+++ b/libcutils/Android.mk
-@@ -102,6 +102,8 @@ LOCAL_SRC_FILES := $(libcutils_common_sources) \
-         qtaguid.c \
-         trace-dev.c \
-         uevent.c \
-+        mtk_xlog.cpp \
-+        mtk_audioCompat.c
+ extern std::string default_console;
+ extern struct selabel_handle *sehandle;
+ extern struct selabel_handle *sehandle_prop;
+diff --git a/libcutils/Android.bp b/libcutils/Android.bp
+index d00ff5f..015774e 100644
+--- a/libcutils/Android.bp
++++ b/libcutils/Android.bp
+@@ -113,6 +113,7 @@ cc_library {
+                 "qtaguid.c",
+                 "trace-dev.c",
+                 "uevent.c",
++                "mtk_xlog.cpp",
+             ],
+             sanitize: {
+                 misc_undefined: ["integer"],
+@@ -157,7 +158,6 @@ cc_library {
+     local_include_dirs: ["include"],
  
- LOCAL_SRC_FILES_arm += arch-arm/memset32.S
- LOCAL_SRC_FILES_arm64 += arch-arm64/android_memset.S
-@@ -133,7 +135,8 @@ endif
- ifneq ($(ENABLE_SCHEDBOOST),)
- LOCAL_CFLAGS += -DUSE_SCHEDBOOST
- endif
--LOCAL_CFLAGS += -Werror -Wall -Wextra -std=gnu90
-+#LOCAL_CFLAGS += -Werror -Wall -Wextra -std=gnu90
-+LOCAL_CFLAGS += -Wall -Wextra -std=gnu90
- LOCAL_CLANG := true
- LOCAL_SANITIZE := integer
- include $(BUILD_STATIC_LIBRARY)
-diff --git a/libcutils/fs_config.c b/libcutils/fs_config.c
-index 68cfcbe..3c01c79 100644
---- a/libcutils/fs_config.c
-+++ b/libcutils/fs_config.c
-@@ -143,7 +143,7 @@ static const struct fs_path_config android_files[] = {
-     { 00700, AID_SYSTEM,    AID_SHELL,     CAP_MASK_LONG(CAP_BLOCK_SUSPEND), "system/bin/inputflinger" },
+     cflags: [
+-        "-Werror",
+         "-Wall",
+         "-Wextra",
+     ],
+diff --git a/libcutils/fs_config.cpp b/libcutils/fs_config.cpp
+index cb15b57..f77a293 100644
+--- a/libcutils/fs_config.cpp
++++ b/libcutils/fs_config.cpp
+@@ -182,8 +182,8 @@ static const struct fs_path_config android_files[] = {
+                                               "system/bin/run-as" },
  
-     /* Support FIFO scheduling mode in SurfaceFlinger. */
--    { 00755, AID_SYSTEM,    AID_GRAPHICS,     CAP_MASK_LONG(CAP_SYS_NICE), "system/bin/surfaceflinger" },
-+    //{ 00755, AID_SYSTEM,    AID_GRAPHICS,     CAP_MASK_LONG(CAP_SYS_NICE), "system/bin/surfaceflinger" },
+     // Support FIFO scheduling mode in SurfaceFlinger.
+-    { 00755, AID_SYSTEM,    AID_GRAPHICS,  CAP_MASK_LONG(CAP_SYS_NICE),
+-                                              "system/bin/surfaceflinger" },
++    //{ 00755, AID_SYSTEM,    AID_GRAPHICS,  CAP_MASK_LONG(CAP_SYS_NICE),
++    //                                          "system/bin/surfaceflinger" },
  
-     { 00750, AID_ROOT,      AID_ROOT,      0, "system/bin/uncrypt" },
-     { 00750, AID_ROOT,      AID_ROOT,      0, "system/bin/install-recovery.sh" },
-diff --git a/libcutils/mtk_audioCompat.c b/libcutils/mtk_audioCompat.c
-new file mode 100644
-index 0000000..7b00e64
---- /dev/null
-+++ b/libcutils/mtk_audioCompat.c
-@@ -0,0 +1,4 @@
-+int get_capture_position(void)
-+{
-+    return 0;
-+}
+     // Support hostapd administering a network interface.
+     { 00755, AID_WIFI,      AID_WIFI,      CAP_MASK_LONG(CAP_NET_ADMIN) |
 diff --git a/libcutils/mtk_xlog.cpp b/libcutils/mtk_xlog.cpp
 new file mode 100644
-index 0000000..48abe31
+index 0000000..7462451
 --- /dev/null
 +++ b/libcutils/mtk_xlog.cpp
 @@ -0,0 +1,27 @@
@@ -166,36 +142,32 @@ index 0000000..48abe31
 +
 +	void dl_register_notify_function(int (*load_notify_function) (const char *name, uintptr_t address, uintptr_t size), int(*unload_notify_function) (const char *name, uintptr_t address)){}
 +}
+\ No newline at end of file
 diff --git a/libnetutils/ifc_utils.c b/libnetutils/ifc_utils.c
-index 7739cf4..72832aa 100644
+index a098d59..6694a43 100644
 --- a/libnetutils/ifc_utils.c
 +++ b/libnetutils/ifc_utils.c
-@@ -37,6 +37,9 @@
+@@ -24,6 +24,7 @@
  #include <linux/ipv6_route.h>
  #include <linux/rtnetlink.h>
  #include <linux/sockios.h>
-+#ifdef MTK_HARDWARE
 +#include <linux/un.h>
-+#endif
- 
- #include "netutils/ifc.h"
- 
-@@ -54,6 +57,9 @@
+ #include <net/if.h>
+ #include <netdb.h>
+ #include <netinet/in.h>
+@@ -50,6 +51,7 @@
  #if defined(__ANDROID__)
  /* SIOCKILLADDR is an Android extension. */
  #define SIOCKILLADDR 0x8939
-+#ifdef MTK_HARDWARE
 +#define SIOCKILLSOCK 0x893a
-+#endif
  #endif
  
  static int ifc_ctl_sock = -1;
-@@ -737,3 +743,320 @@ ifc_configure(const char *ifname,
+@@ -725,3 +727,316 @@ ifc_configure(const char *ifname,
  
      return 0;
  }
 +
-+#ifdef MTK_HARDWARE
 +int ifc_reset_connection_by_uid(int uid, int error)
 +{
 +#if defined(__ANDROID__)
@@ -508,27 +480,30 @@ index 7739cf4..72832aa 100644
 +    close(ctl_sock);
 +    return ret;
 +}
+diff --git a/libnetutils/include/netutils/ifc.h b/libnetutils/include/netutils/ifc.h
+index 3b27234..d7e0aab 100644
+--- a/libnetutils/include/netutils/ifc.h
++++ b/libnetutils/include/netutils/ifc.h
+@@ -61,6 +61,19 @@ extern int ifc_configure(const char *ifname, in_addr_t address,
+ 
+ extern in_addr_t prefixLengthToIpv4Netmask(int prefix_length);
+ 
++extern int ifc_is_up(const char *name, unsigned *isup);
++extern int ifc_enable_allmc(const char *name);
++extern int ifc_disable_allmc(const char *name);
++extern int ifc_reset_connection_by_uid(int uid, int error); 
++extern int ifc_set_throttle(const char *ifname, int rxKbps, int txKbps);
++extern int ifc_set_fwmark_rule(const char *ifname, int mark, int add);
++extern int ifc_set_txq_state(const char *ifname, int state);
++extern int ifc_ccmni_md_cfg(const char *ifname, int md_id);
++struct uid_err {
++    int appuid;
++	int errorNum;
++};
 +
-+
-+#endif
-diff --git a/healthd/BatteryMonitor.cpp b/healthd/BatteryMonitor.cpp
-index d2088eefb..d2820e8aa 100644
---- a/healthd/BatteryMonitor.cpp
-+++ b/healthd/BatteryMonitor.cpp
-@@ -228,7 +228,11 @@ bool BatteryMonitor::update(void) {
-     props.batteryLevel = mBatteryFixedCapacity ?
-         mBatteryFixedCapacity :
-         getIntField(mHealthdConfig->batteryCapacityPath);
-+#ifndef MTK_BATTERY_VOLTAGE
-     props.batteryVoltage = getIntField(mHealthdConfig->batteryVoltagePath) / 1000;
-+#else
-+    props.batteryVoltage = getIntField(mHealthdConfig->batteryVoltagePath);
-+#endif
-
-     if (!mHealthdConfig->batteryCurrentNowPath.isEmpty())
-         props.batteryCurrent = getIntField(mHealthdConfig->batteryCurrentNowPath) / 1000;
-
-
+ __END_DECLS
+ 
+ #endif /* _NETUTILS_IFC_H_ */
 -- 
 1.9.1
 
