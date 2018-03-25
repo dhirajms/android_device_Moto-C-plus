@@ -62,7 +62,6 @@ allow emdlogger vfat:dir create_dir_perms;
 allow emdlogger vfat:file create_file_perms;
 
 #modem logger permission in storage in android M version
-allow emdlogger log_device:chr_file { write open };
 allow emdlogger mnt_user_file:dir search;
 allow emdlogger mnt_user_file:lnk_file read;
 allow emdlogger storage_file:lnk_file read;
@@ -92,7 +91,6 @@ allow emdlogger sysfs_ccci:file r_file_perms;
 allow emdlogger system_file:dir read;
 
 # permission for android N policy
-allow emdlogger security_file:dir search;
 allow emdlogger toolbox_exec:file rx_file_perms;
 
 # purpose: allow emdlogger to access storage in N version

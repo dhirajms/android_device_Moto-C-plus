@@ -66,23 +66,11 @@ allow system_app touch_device:chr_file { read ioctl open };
 # Package Name: com.mediatek.batterywarning
 allow system_app guiext-server:binder { transfer call };
 
-# Date : 2014/11/17
-# Operation: SQC
-# Purpose : [Settings][Battery module will call batterystats API, and it will read /sys/kernel/debug/wakeup_sources]
-# Package: com.android.settings
-#allow system_app debugfs:file r_file_perms;
-
 # Date : 2014/11/20
 # Operation: SQC
 # Purpose: [Settings][Developer options module will communicate with all Services through binder call]
 # Package: com.android.settings
 binder_call(system_app, MtkCodecService)
-
-# Date : 2014/11/26
-# Operation: SQC
-# Purpose: [Settings][Browser][warning kernel API'selinux enforce violation:sdcardd' when do stress test with ' AT_ST_Browser_Test.rar']
-# Package: com.android.settings
-allow system_app platform_app_tmpfs:file write;
 
 # Date: 2014/08/04
 # Stage: BaseUT
@@ -211,19 +199,6 @@ allow system_app ctl_rbfota_prop:property_service set;
 # Purpose: [RCS][RCS will use rcs_ua_proxy to connect to volte_rcs_ua which in native layer]
 # Package Name: com.orangelasb.rcs:core
 allow system_app ril_volte_stack_rcsuaproxy_prop:property_service set;
-
-
-# Date : 2015/01/13
-# Operation: SQC
-# Purpose: access ashmem of isolated_app
-# Package: com.fw.upgrade.sysoper
-dontaudit system_app isolated_app_tmpfs:file write;
-
-# Date : 2015/01/14
-# Operation: SQC
-# Purpose: access ashmem of untrusted_app
-# Package: android.ui
-dontaudit system_app untrusted_app_tmpfs:file write;
 
 # Date : 2015/01/27
 # Operation: SQC

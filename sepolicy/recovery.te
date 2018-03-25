@@ -3,8 +3,6 @@ allow recovery mtd_device:dir search;
 allow recovery mtd_device:chr_file { read write open ioctl getattr };
 allow recovery self:capability sys_resource;
 
-allow recovery system_app_data_file:dir {search };
-allow recovery system_app_data_file:file {read open};
 # ==============================================
 # MTK Policy Rule
 # ==============================================
@@ -13,15 +11,10 @@ allow recovery system_app_data_file:file {read open};
 # Date : WK14.38
 # Operation : Migration 
 # Purpose : for recovery operation 
-allow recovery misc_device:chr_file *;
 allow recovery block_device:dir *;
-allow recovery block_device:blk_file *;
-allow recovery system_block_device:blk_file *;
 allow recovery vfat:dir *;
 allow recovery vfat:file ~{ execute entrypoint };
 #allow recovery vfat:lnk_file *;
-allow recovery misc_sd_device:chr_file *;
-allow recovery userdata_block_device:blk_file *;
 
 # Date : WK14.39
 # Operation : Migration 
@@ -34,11 +27,6 @@ allow recovery rootfs:dir *;
 # Date : WK14.41
 # Operation : Migration 
 # Purpose : Differential update
-allow recovery bootimg_device:chr_file *;
-allow recovery recovery_device:chr_file *;
-allow recovery logo_device:chr_file *;
-allow recovery preloader_device:chr_file *;
-allow recovery uboot_device:chr_file *;
 allow recovery init:dir *;
 allow recovery init:file ~{ execute entrypoint execute_no_trans};
 allow recovery init:lnk_file *;
@@ -80,12 +68,6 @@ userdebug_or_eng(`
 # Operation : Migration 
 # Purpose : JB to L differential OTA
 #allow recovery unlabeled:lnk_file *;
-
-# Date : WK14.45
-# Operation : SQC
-# Purpose : partition size changed
-allow recovery pmt_device:chr_file *;
-allow recovery tee_part_device:chr_file *;
 
 # Date : WK14.45
 # Operation : Migration 

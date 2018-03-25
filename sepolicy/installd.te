@@ -25,7 +25,6 @@ allow installd custom_file:dir search;
 # Date : WK14.34
 # Operation : Development GMO Feature "Move OAT to SD Card"
 # Purpose : for GMO ROM Size Slim
-allow installd dalvikcache_data_file:lnk_file { read getattr setattr unlink create };
 allow installd sdcard_type:dir { write read remove_name search create add_name getattr setattr };
 allow installd sdcard_type:file { write getattr setattr read create unlink open };
 
@@ -51,11 +50,6 @@ allow installd system_data_file:file open;
 # Purpose : ALPS01889518 (MTK MTBF)
 allow installd platform_app:fd use;
 
-# Date : WK15.03
-# Operation : SQC1
-# Purpose : ALPS01911340 (MTK MTBF for GMO project)
-allow installd platform_app_tmpfs:file { open read write getattr };
-
 # Date : WK15.32
 # Operation : Migration
 # Purpose : disable AT_SECURE for LD_PRELOAD
@@ -68,3 +62,6 @@ userdebug_or_eng(`
 # Purpose : copy the content in /data/media/0 to /data/media
 allow installd media_rw_data_file:file { read write create open setattr };
 allow installd shell_exec:file { read execute open execute_no_trans };
+
+# O
+allow installd system_data_file:lnk_file { getattr };

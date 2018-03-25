@@ -21,7 +21,6 @@
 
 /data/aee_exp(/.*)?  u:object_r:aee_exp_data_file:s0
 /data/agps_supl(/.*)?    u:object_r:agpsd_data_file:s0
-/data/misc/gps(/.*)?   u:object_r:gps_data_file:s0
 /data/anr/SF_RTT(/.*)? u:object_r:sf_rtt_file:s0
 /data/ccci_cfg(/.*)? u:object_r:ccci_cfg_file:s0
 /data/flashless(/.*)? u:object_r:c2k_file:s0
@@ -128,7 +127,6 @@
 /dev/fat(/.*)? u:object_r:fat_device:s0
 /dev/FM50AF(/.*)? u:object_r:FM50AF_device:s0
 /dev/fm(/.*)? u:object_r:fm_device:s0
-/dev/gps(/.*)? u:object_r:gps_device:s0
 /dev/hdmitx(/.*)? u:object_r:graphics_device:s0
 /dev/hid-keyboard(/.*)? u:object_r:hid_keyboard_device:s0
 /dev/ion(/.*)? u:object_r:ion_device:s0
@@ -427,7 +425,6 @@
 /(system\/vendor|vendor)/bin/thermalloadalgod u:object_r:thermalloadalgod_exec:s0
 /(system\/vendor|vendor)/bin/tiny_mkswap u:object_r:tiny_mkswap_exec:s0
 /(system\/vendor|vendor)/bin/tiny_swapon u:object_r:tiny_swapon_exec:s0
-/system/bin/tune2fs u:object_r:tune2fs_exec:s0
 /(system\/vendor|vendor)/bin/thermalindicator u:object_r:thermalindicator_exec:s0
 /(system\/vendor|vendor)/bin/wifi2agps u:object_r:wifi2agps_exec:s0
 /(system\/vendor|vendor)/bin/wmt_loader u:object_r:wmt_loader_exec:s0
@@ -582,8 +579,6 @@
 /(system\/vendor|vendor)/bin/mc6420d u:object_r:mc6420d_exec:s0
 /(system\/vendor|vendor)/bin/ppl_agent u:object_r:ppl_agent_exec:s0
 /(system\/vendor|vendor)/bin/rild_dongle u:object_r:ril-3gddaemon_exec:s0
-/(system\/vendor|vendor)/bin/gsm0710muxdmd2 u:object_r:gsm0710muxdmd2_exec:s0
-/(system\/vendor|vendor)/bin/mtkrildmd2 u:object_r:mtkrildmd2_exec:s0
 /(system\/vendor|vendor)/bin/terservice u:object_r:terservice_exec:s0
 /(system\/vendor|vendor)/bin/volte_imcb u:object_r:volte_imcb_exec:s0
 /(system\/vendor|vendor)/bin/volte_stack u:object_r:volte_stack_exec:s0

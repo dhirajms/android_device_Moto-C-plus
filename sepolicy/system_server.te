@@ -32,10 +32,6 @@ allow system_server m_fusion_misc_device:chr_file rw_file_perms;
 allow system_server sensor_data_file:file create_file_perms;
 allow system_server sensor_data_file:dir rw_dir_perms;
 
-# Access mtk gps devices.
-allow system_server gps_data_file:file create_file_perms;
-allow system_server gps_data_file:dir rw_dir_perms;
-
 # /proc access.
 allow system_server proc:file w_file_perms;
 
@@ -52,7 +48,6 @@ allow system_server aee_core_data_file:dir r_dir_perms;
 allow system_server debugfs:dir r_dir_perms;
 
 # Perform Binder IPC.
-binder_call(system_server,debuggerd)
 allow system_server zygote:binder impersonate;
 
 # Property service.
@@ -79,7 +74,6 @@ allow system_server hostapd:unix_dgram_socket sendto;
 allow hostapd system_server:unix_dgram_socket sendto;
 
 # Communicate over a socket created by mnld process.
-allow system_server debuggerd:fd use;
 allow system_server mnld_data_file:sock_file create_file_perms;
 allow system_server mnld_data_file:sock_file rw_file_perms;
 allow system_server mnld_data_file:dir create_file_perms;
@@ -102,9 +96,6 @@ allow system_server mtkFlpDaemon_data_file:sock_file create_file_perms;
 allow system_server mtkFlpDaemon_data_file:sock_file rw_file_perms;
 allow system_server mtkFlpDaemon_data_file:dir create_file_perms;
 allow system_server mtkFlpDaemon_data_file:dir rw_dir_perms;
-
-# Purpose: allow debuggerd to do dumpsys
-allow system_server debuggerd:fifo_file write;
 
 # Allow system_server to read /sys/kernel/debug/wakeup_sources
 allow system_server debugfs_wakeup_sources:file r_file_perms;

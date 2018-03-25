@@ -24,11 +24,6 @@ allow kernel vold_device:blk_file rw_file_perms;
 # Purpose :  Access to nvarm for reading MAC. (LOS WIFI feature)
 allow kernel nvram_device:blk_file rw_file_perms; 
 
-# Date : WK15.29
-# Operation : Migration
-# Purpose : grant wifi data file access for mtk_wmtd as root.
-allow kernel self:capability { dac_read_search dac_override };
-
 # Date : WK15.35
 # Operation : Migration
 # Purpose : grant fon_image_data_file read permission for loop device
@@ -74,7 +69,5 @@ allow kernel block_device:dir search;
 # Date : WK16.30
 # Operation: SQC
 # Purpose: Allow sdcardfs workqueue to access lower file systems
-allow kernel {vfat fuseblk mnt_media_rw_file}:dir create_dir_perms;
-allow kernel {vfat fuseblk mnt_media_rw_file}:file create_file_perms;
 allow kernel kernel:key { write search setattr };
 

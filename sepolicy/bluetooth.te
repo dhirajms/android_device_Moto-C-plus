@@ -26,9 +26,6 @@ allow bluetooth nvdata_file:file { read write getattr open };
 allow bluetooth block_device:dir search;
 allow bluetooth proc_secmem:file { read open };
 
-# Temp FS access
-allow bluetooth platform_app_tmpfs:file write;
-
 # Date : WK15.36
 # Operation : Migration
 # Purpose: Allow bluetooth to access surfaceflinger
@@ -43,3 +40,6 @@ allow bluetooth rilproxy:unix_stream_socket connectto;
 # Operation: Program binary service
 # Purpose : Add permission for program binary service find from ServiceManager.
 allow bluetooth program_binary_service:service_manager find;
+
+# O
+allow bluetooth wmt_prop:file { getattr open };

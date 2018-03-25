@@ -136,9 +136,6 @@ allow vtservice mediacodec_service:service_manager find;
 allow vtservice mediacodec:binder call;
 allow vtservice qtaguid_device:chr_file r_file_perms;
 allow vtservice qtaguid_proc:file rw_file_perms;
-allow debuggerd vtservice:fifo_file create_file_perms;
-allow debuggerd vtservice:unix_dgram_socket create_socket_perms;
-allow debuggerd vtservice:unix_stream_socket create_stream_socket_perms;
 allow vtservice priv_app:binder call;
 
 #============= vtservice ==============

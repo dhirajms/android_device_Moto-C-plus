@@ -216,11 +216,6 @@ allow audioserver offloadservice_device:chr_file { read write ioctl open };
 # Purpose : for WFD looper
 allow audioserver custom_file:dir search;
 
-# Data : WK14.48
-# Operation : WFD
-# Purpose : For WFD scenario
-allow audioserver untrusted_app_tmpfs:file write;
-
 # Date : WK14.49
 # Operation : WFD
 # Purpose : WFD notifies its status to thermal module

@@ -62,15 +62,10 @@ allow volte_imsm_md wod_action_socket:sock_file write;
 allow volte_imsm_md self:udp_socket { create ioctl };
 
 #for RAN access wpa
-unix_socket_send(volte_imsm_md, wpa, wpa)
 allow volte_imsm_md wpa_socket:dir rw_dir_perms;
 allow volte_imsm_md wpa_socket:sock_file create_file_perms;
 allow volte_imsm_md wifi_data_file:dir create_dir_perms;
 allow volte_imsm_md wifi_data_file:file create_file_perms;
-allow volte_imsm_md wpa:unix_dgram_socket sendto;
-allow wpa volte_imsm_md:unix_stream_socket connectto;
-allow wpa volte_imsm_md:unix_dgram_socket sendto;
-allow wpa init:unix_dgram_socket sendto;
 
 #for timer
 allow volte_imsm_md self:capability2 wake_alarm;

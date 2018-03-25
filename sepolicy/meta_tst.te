@@ -166,9 +166,6 @@ allow meta_tst stpbt_device:chr_file rw_file_perms;
 # Date: WK16.12
 # Operation : Migration
 # Purpose : meta mode GPS
-allow meta_tst gps_device:chr_file rw_file_perms;
-allow meta_tst gps_data_file:file create_file_perms;
-allow meta_tst gps_data_file:dir rw_dir_perms;
 allow meta_tst agpsd_data_file:dir search;
 allow meta_tst agpsd_data_file:sock_file write;
 allow meta_tst mnld_device:chr_file rw_file_perms;
@@ -273,9 +270,7 @@ allow meta_tst init_thh_service_exec:file { x_file_perms read open };
 allow meta_tst teei_data_file:dir create_dir_perms;
 allow meta_tst teei_data_file:file rw_file_perms;
 allow meta_tst teei_data_file:file create_file_perms;
-allow meta_tst teei_client_device:chr_file create_file_perms;
 allow meta_tst soter_teei_prop:property_service {set};
-allow meta_tst teei_client_device:chr_file rw_file_perms;
 allow meta_tst teei_thh_data_file:dir { search write };
 allow meta_tst teei_thh_data_file:file create_file_perms;
 allow meta_tst teei_thh_data_file:file rw_file_perms;

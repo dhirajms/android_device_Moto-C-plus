@@ -94,9 +94,6 @@ allow factory factory_idle_state_prop:property_service set;
 # Purpose: gps factory mode
 allow factory agpsd_data_file:dir search;
 allow factory apk_data_file:dir write;
-allow factory gps_data_file:dir r_dir_perms;
-allow factory gps_data_file:dir { write open };
-allow factory gps_data_file:file { read write };
 # allow factory gps_emi_device:chr_file { read write };
 allow factory shell_exec:file x_file_perms;
 allow factory storage_file:lnk_file r_file_perms;
@@ -213,7 +210,6 @@ allow factory input_device:chr_file r_file_perms;
 allow factory input_device:dir rw_dir_perms;
 
 #Purpose: For gps test
-allow factory gps_device:chr_file rw_file_perms;
 allow factory MPED_exec:file rx_file_perms;
 allow factory mtkFlpDaemon_exec:file rx_file_perms;
 
@@ -234,14 +230,12 @@ allow factory sysfs:file rw_file_perms;
 # Date: WK16.30
 #Purpose: For gps test
 allow factory media_rw_data_file:dir search;
-allow factory gps_data_file:dir add_name;
 allow factory mnld:unix_dgram_socket sendto;
 
 # Date: WK16.31
 #Purpose: For gps test
 allow factory mnld_prop:property_service set;
 allow factory media_rw_data_file:dir { read open };
-allow factory gps_data_file:file create_file_perms;
 # ==============================================
 # Policy File of /system/binfactory Executable File 
 

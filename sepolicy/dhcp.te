@@ -19,7 +19,6 @@ allow dhcp kernel:system module_request;
 # Purpose: Search on Internet using browser, the 3th App use dhcp
 #============= netd ==============
 allow dhcp platform_app:fd use;
-allow dhcp platform_app_tmpfs:file write;
 
 allow dhcp init:fifo_file rw_file_perms;
 allow dhcp init:unix_stream_socket { read write };

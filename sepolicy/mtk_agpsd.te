@@ -16,8 +16,6 @@ net_domain(mtk_agpsd)
 
 # Access channels to modem for E-CID, RRLP, and LPP
 allow mtk_agpsd agps_device:chr_file rw_file_perms;
-allow mtk_agpsd ttySDIO_device:chr_file create_file_perms;
-allow mtk_agpsd ccci_device:chr_file create_file_perms;
 
 # Access folders, files, and sockets in /data/agps_supl
 allow mtk_agpsd agpsd_data_file:dir create_dir_perms;

@@ -50,7 +50,6 @@ allow mdlogger vfat:dir create_dir_perms;
 allow mdlogger vfat:file create_file_perms;
 
 #mdlogger for read /sdcard
-allow mdlogger log_device:chr_file w_file_perms;
 allow mdlogger tmpfs:lnk_file read;
 allow mdlogger storage_file:lnk_file rw_file_perms;
 allow mdlogger mnt_user_file:dir search;

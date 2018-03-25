@@ -60,22 +60,14 @@ allow mtkrild system_file:file x_file_perms;
 allow mtkrild proc:file rw_file_perms;
 allow mtkrild proc_net:file w_file_perms;
 
-# Allow mtkrild to create and use netlink sockets.
-allow mtkrild self:netlink_socket create_socket_perms;
-allow mtkrild self:netlink_kobject_uevent_socket create_socket_perms;
 # Set and get routes directly via netlink.
 allow mtkrild self:netlink_route_socket nlmsg_write;
-
-# Allow mtkrild to create sockets.
-allow mtkrild self:socket create_socket_perms;
 
 # Allow read/write to devices/files
 allow mtkrild alarm_device:chr_file rw_file_perms;
 allow mtkrild radio_device:chr_file rw_file_perms;
 allow mtkrild radio_device:blk_file r_file_perms;
 allow mtkrild mtd_device:dir search;
-# Allow read/write to uart driver (for GPS)
-allow mtkrild gps_device:chr_file rw_file_perms;
 # Allow read/write to tty devices
 allow mtkrild tty_device:chr_file rw_file_perms;
 allow mtkrild eemcs_device:chr_file { rw_file_perms };
@@ -87,7 +79,6 @@ allow mtkrild ccci_device:chr_file { rw_file_perms };
 allow mtkrild misc_device:chr_file { rw_file_perms };
 allow mtkrild proc_lk_env:file rw_file_perms;
 allow mtkrild sysfs_vcorefs_pwrctrl:file { w_file_perms };
-allow mtkrild radio_tmpfs:file { w_file_perms };
 allow mtkrild mmcblk0_block_device:blk_file { rw_file_perms };
 allow mtkrild para_block_device:blk_file { rw_file_perms };
 

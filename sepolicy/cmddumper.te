@@ -39,6 +39,3 @@ allow cmddumper debug_prop:property_service set;
 # purpose: allow cmddumper to access storage in N version
 allow cmddumper media_rw_data_file:file  { create_file_perms };
 allow cmddumper media_rw_data_file:dir { create_dir_perms };
-
-# purpose: access vmodem device
-allow cmddumper vmodem_device:chr_file { create_file_perms };

@@ -31,10 +31,6 @@ allow sdcardd vold_socket:sock_file write;
 allow sdcardd platform_app:fd use;
 allow sdcardd untrusted_app:fd use;
 
-# Date : WK15.02
-# Purpose : ashared memory
-allow sdcardd platform_app_tmpfs:file write;
-
 # Date : WK15.15
 # Purpose : access mmcblk0_block_device
 allow sdcardd mmcblk0_block_device:blk_file { read write open };

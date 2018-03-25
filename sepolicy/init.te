@@ -37,13 +37,6 @@ allow init odm_block_device:blk_file rw_file_perms;
 allow init oem_block_device:blk_file rw_file_perms;
 allow init para_block_device:blk_file w_file_perms;
 
-# Date : WK15.32
-# Operation : Migration
-# Purpose : disable AT_SECURE for LD_PRELOAD
-userdebug_or_eng(`
-  allow init { domain -lmkd }:process noatsecure;
-')
-
 # Date : WK16.26
 # Operation : Access dynamic_debug control file
 # Purpose : For MobileLog on/off pr_debug on user/userdebug load

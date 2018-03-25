@@ -64,13 +64,6 @@ allow mediaserver Vcodec_device:chr_file rw_file_perms;
 
 # Date : WK14.36
 # Operation : Migration
-# Purpose : MMProfile debug
-# userdebug_or_eng(`
-#allow mediaserver debugfs:file {read ioctl getattr};
-# ')
-
-# Date : WK14.36
-# Operation : Migration
 # Purpose :  access nvram, otp, ccci cdoec devices.
 allow mediaserver MtkCodecService:binder call;
 allow mediaserver ccci_device:chr_file rw_file_perms;
@@ -367,11 +360,6 @@ allow mediaserver surfaceflinger:file { read open };
 # Operation : Migration
 # Purpose : for WFD looper
 allow mediaserver custom_file:dir search;
-
-# Data : WK14.48
-# Operation : WFD
-# Purpose : For WFD scenario
-allow mediaserver untrusted_app_tmpfs:file write;
 
 # Date : WK14.49
 # Operation : WFD

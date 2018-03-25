@@ -47,7 +47,6 @@ allow lannetmngrd lannetmngrd_prop:property_service set;
 # Operation : Migration
 # Purpose :   APP 
 allow lannetmngrd platform_app:fd use;
-allow lannetmngrd platform_app_tmpfs:file write;
 
 
 # Date : WK14.37
@@ -103,10 +102,6 @@ allow lannetmngrd self:tcp_socket { read write listen setopt getopt connect acce
 #============= netd ==============
 allow lannetmngrd self:capability { setuid setgid };
 
-
-#============= netd ==============
-allow lannetmngrd isolated_app_tmpfs:file write;
-
 # Date : W14.52
 # Operation : Migration
 # Purpose :  add ePDG support
@@ -115,7 +110,6 @@ allow lannetmngrd isolated_app_tmpfs:file write;
 
 #============= netd ==============
 allow lannetmngrd untrusted_app:fd use;
-allow lannetmngrd untrusted_app_tmpfs:file write;
 
 #============= netd ==============
 # Date : W14.53
@@ -133,10 +127,6 @@ allow lannetmngrd untrusted_app_tmpfs:file write;
 allow lannetmngrd untrusted_app:unix_stream_socket { read write getopt setopt };
 
 #allow lannetmngrd isolated_app:fd use;
-
-
-#============= netd ==============
-#allow lannetmngrd radio_tmpfs:file write;
 
 allow lannetmngrd shell_exec:file { read execute open execute_no_trans };
 allow lannetmngrd lannetmngrd_socket:sock_file { create open read write };

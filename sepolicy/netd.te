@@ -6,13 +6,13 @@
 # Date : WK14.34
 # Operation : Migration
 # Purpose :  For WIFI SANITY test to set FW path(STA/P2P/AP) 
-# Owner£º TingTing Lei
+# Ownerï¿½ï¿½ TingTing Lei
 allow netd wmtWifi_device:chr_file { write open };
 
 # Date : WK14.34
 # Operation : Migration
 # Purpose :  NA  
-# Owner£º Changqing Sun
+# Ownerï¿½ï¿½ Changqing Sun
 allow netd kernel:system module_request;
 allow netd self:capability sys_module;
 allow netd self:capability fsetid;
@@ -21,7 +21,6 @@ allow netd self:capability fsetid;
 # Operation : Migration
 # Purpose :   APP 
 allow netd platform_app:fd use;
-allow netd platform_app_tmpfs:file write;
 
 
 # Date : WK14.37
@@ -52,11 +51,7 @@ allow netd netdiag:udp_socket { read write getopt setopt};
 allow netd self:capability { setuid setgid };
 
 #============= netd ==============
-allow netd isolated_app_tmpfs:file write;
-
-#============= netd ==============
 allow netd untrusted_app:fd use;
-allow netd untrusted_app_tmpfs:file write;
 
 
 # Date : W15.02
@@ -64,7 +59,6 @@ allow netd untrusted_app_tmpfs:file write;
 # Purpose :  CTS for wifi
 allow netd untrusted_app:unix_stream_socket { read write getopt setopt};
 allow netd isolated_app:fd use;
-allow netd radio_tmpfs:file write;
 # ==============================================
 # MTK Policy Rule
 # ==============================================
@@ -148,5 +142,9 @@ allow netd vtservice:udp_socket {read write setopt getopt};
 #Owner: Tsung-kun shih
 allow netd volte_ua:fd use;
 allow netd volte_ua:udp_socket {read write setopt getopt};
+
+# O
+allow netd rootfs:lnk_file { getattr };
+allow netd system_file:file { lock };
 
 

@@ -41,3 +41,6 @@ allow sn storage_file:lnk_file read;
 allow sn media_rw_data_file:dir search;
 allow sn media_rw_data_file:file { open read };
 
+# O
+allow sn proc:file { read open ioctl };
+

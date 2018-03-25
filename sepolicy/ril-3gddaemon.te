@@ -35,10 +35,6 @@ auditallow ril-3gddaemon system_radio_prop:property_service set;
 # Read/Write to uart driver (for 3gdongle)
 allow ril-3gddaemon tty_device:chr_file rw_file_perms;
 
-# Allow ril-3gddaemon to create and use netlink sockets.
-allow ril-3gddaemon self:netlink_socket create_socket_perms;
-allow ril-3gddaemon self:netlink_kobject_uevent_socket create_socket_perms;
-
 allow ril-3gddaemon init:dir { getattr open read search };
 allow ril-3gddaemon ppp_exec:file { read open getattr execute execute_no_trans };
 allow ril-3gddaemon ppp_device:chr_file { read write open ioctl };
@@ -46,8 +42,6 @@ allow ril-3gddaemon device:dir { read open write};
 
 # Access to wake locks
 wakelock_use(ril-3gddaemon)
-
-allow ril-3gddaemon self:socket create_socket_perms;
 
 #system/bin/toybox for tedongle(ril-3gddaemon) script
 allow ril-3gddaemon toolbox_exec:file rx_file_perms;
