@@ -2,12 +2,12 @@ on early-init
    write /sys/module/musb_hdrc/parameters/kernel_init_done 1
 
 on boot
-    setprop sys.usb.vid ${ro.usb.vid}
-    write /sys/class/android_usb/android0/iManufacturer ${ro.product.manufacturer}
+    setprop sys.usb.vid 22B8
+    write /sys/class/android_usb/android0/iManufacturer MediaTek
     write /sys/class/android_usb/android0/iProduct ${ro.product.model}
     write /sys/class/android_usb/android0/iSerial ${ro.serialno}
     write /sys/class/android_usb/android0/f_rndis/wceis 1
-    write /sys/class/android_usb/android0/f_rndis/manufacturer ${ro.product.manufacturer}
+    write /sys/class/android_usb/android0/f_rndis/manufacturer MediaTek
     write /sys/class/android_usb/android0/f_rndis/vendorID ${sys.usb.vid}
 
 on fs
@@ -17,6 +17,7 @@ on fs
     write /sys/class/android_usb/android0/f_ffs/aliases adb
     chown system system /sys/class/android_usb/android0/f_acm/port_index
     chmod 0660 /sys/class/android_usb/android0/f_acm/port_index
+
 
 on post-fs-data
     chown radio system /sys/class/usb_rawbulk/data/enable

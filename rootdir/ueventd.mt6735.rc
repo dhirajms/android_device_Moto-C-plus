@@ -9,39 +9,33 @@
 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/secro     0640    root    system
 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/seccfg    0660    root    system
 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/proinfo   0660    root    system
-/dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/otp       0640    root    system
 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/nvram     0660    root    system
 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/para      0660    root    system
 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/logo      0660    root    system
 /dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/frp       0660    root    system
-/dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/ppl       0660    root    system
-/dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/md1img    0660    root    system
-/dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/md1dsp    0660    root    system
-/dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/md1arm7   0660    root    system
-/dev/block/platform/mtk-msdc.0/11230000.msdc0/by-name/md3img    0660    root    system
 
 # OTP
-/dev/otp                 0660 system system
+/dev/otp                  0660  system      system
 
 # Connectivity
-/dev/stpwmt               0660   system     system
-/dev/wmtdetect            0660   system     system
+/dev/stpwmt               0660  system      system
+/dev/wmtdetect            0660  system      system
 
 # BT
-/dev/stpbt                0660   bluetooth  net_bt_stack
+/dev/stpbt                0660  bluetooth   bluetooth
 
 # GPS
-/dev/stpgps               0660   gps        gps
-/dev/gps                  0660   gps        system
+/dev/stpgps               0660  gps         gps
+/dev/gps                  0660  gps         system
 
 # ANT
-/dev/stpant               0660   system     system
+/dev/stpant				  0660  system      system
 
 # WIFI
-/dev/wmtWifi              0660   system     system
+/dev/wmtWifi              0660  wifi      wifi
 
 # FMRadio
-/dev/fm                   0660   media     media
+/dev/fm			          0660  system	   media
 
 # NFC
 /dev/msr3110              0666   root       root
@@ -123,14 +117,8 @@
 /sys/devices/platform/egis_input/navigation_enable 0660 system system
 /sys/devices/platform/egis_input/navigation_event 0660 system system
 
+#nfc permissions
+/dev/pn547                0664   nfc        nfc
+
 # tp test
 /dev/rmi0		  0666   system     system
-
-# fingerprint ma120n
-/dev/madev0               0777   system     system
-
-# fingerprint goodix
-/dev/goodix_fp               0666   system     system
-
-# fingerprint sunwave
-/dev/sunwave_fp               0666   system     system
