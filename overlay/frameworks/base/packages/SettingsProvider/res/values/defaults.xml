@@ -32,5 +32,8 @@
     <bool name="def_install_non_market_apps">true</bool>
     
     <bool name="def_backup_enabled">false</bool>
-
+    
+    <fraction name="def_window_animation_scale">50%</fraction>
+    <fraction name="def_window_transition_scale">50%</fraction>
+    
 </resources>
