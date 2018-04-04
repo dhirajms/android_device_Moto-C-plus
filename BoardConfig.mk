@@ -40,7 +40,7 @@ BOARD_FLASH_BLOCK_SIZE := 131072
 TARGET_SYSTEM_PROP += device/moto/panelli/system.prop
 
 # Camera
-#USE_CAMERA_STUB := true
+USE_CAMERA_STUB := true
 
 # FSTAB
 TARGET_RECOVERY_FSTAB := device/moto/panelli/rootdir/fstab.mt6735
