@@ -45,7 +45,6 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     librs_jni \
     com.android.future.usb.accessory \
-    charger \
     charger_res_images \
     libnl_2 \
     libion \
