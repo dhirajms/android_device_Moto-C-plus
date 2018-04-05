@@ -8,6 +8,11 @@ PRODUCT_PACKAGES += \
     init.mt6735.usb.rc \
     ueventd.mt6735.rc
 
+# Ramdisk
+PRODUCT_COPY_FILES += \
+   $(LOCAL_PATH)/rootdir/enableswap.sh:root/enableswap.sh \
+   $(LOCAL_PATH)/rootdir/sbin/busybox:root/sbin/busybox
+
 # Audio
 PRODUCT_PACKAGES += \
     audio.a2dp.default \
