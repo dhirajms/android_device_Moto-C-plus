@@ -4,8 +4,6 @@ TARGET_BOARD_PLATFORM := mt6737m
 
 FORCE_32_BIT := true
 
-WITH_DEXPREOPT := false
-
 # Architecture
 ifeq ($(FORCE_32_BIT),true)
 TARGET_ARCH := arm
@@ -86,20 +84,19 @@ BOARD_HAVE_BLUETOOTH := true
 BOARD_USES_CYANOGEN_HARDWARE := true
 BOARD_HARDWARE_CLASS += device/moto/panelli/cmhw
 
-ifeq ($(HOST_OS),linux)
-  ifeq ($(TARGET_BUILD_VARIANT),user)
-		WITH_DEXPREOPT ?= true
-  endif
-endif
+#dexopt
+WITH_DEXPREOPT := false
 
 # Display
-USE_OPENGL_RENDERER := true
+BOARD_EGL_CFG := /vendor/moto/panelli/proprietary/vendor/lib/egl/egl.cfg
+USE_OPENGL_RENDERER:=true
 NUM_FRAMEBUFFER_SURFACE_BUFFERS := 3
 TARGET_RUNNING_WITHOUT_SYNC_FRAMEWORK := true
 TARGET_FORCE_HWC_FOR_VIRTUAL_DISPLAYS := true
 PRESENT_TIME_OFFSET_FROM_VSYNC_NS := 0
 MTK_HWC_SUPPORT := yes
 MTK_HWC_VERSION := 1.5.0
+MTK_GPU_VERSION := mali midgard r18p0
 OVERRIDE_RS_DRIVER := libRSDriver_mtk.so
 
 # Mediatek support
