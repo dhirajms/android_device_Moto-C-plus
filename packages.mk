@@ -58,3 +58,7 @@ PRODUCT_PACKAGES += \
 # Radio
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.kernel.android.checkjni=0
+
+#doze
+PRODUCT_PACKAGES += \
+    DozePanelli
