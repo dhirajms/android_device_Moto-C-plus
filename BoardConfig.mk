@@ -124,6 +124,10 @@ endif
 BOARD_SEPOLICY_DIRS := device/moto/panelli/sepolicy
 BOARD_SECCOMP_POLICY += device/moto/panelli/seccomp
 
+#sdclang
+TARGET_USE_SDCLANG=false
+SDCLANG=false
+
 # Wireless
 BOARD_WLAN_DEVICE := MediaTek
 WPA_SUPPLICANT_VERSION := VER_0_8_X
