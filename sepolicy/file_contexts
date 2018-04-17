@@ -367,8 +367,8 @@
 /sys/devices/virtual/misc/scp(/.*)?  u:object_r:sysfs_scp:s0
 /sys/kernel/ccci(/.*)? u:object_r:sysfs_ccci:s0
 /sys/mtk_ssw(/.*)? u:object_r:sysfs_ssw:s0
-/sys/bus/platform/drivers/dev_info/dev_info u:object_r:sysfs_devinfo:s0
-/sys/devices/platform/mtk_disp_mgr.0/rgb u:object_r:livedisplay_sysfs:s0
+#/sys/bus/platform/drivers/dev_info/dev_info u:object_r:sysfs_devinfo:s0
+#/sys/devices/platform/mtk_disp_mgr.0/rgb u:object_r:livedisplay_sysfs:s0
 
 #############################
 # debugfs files

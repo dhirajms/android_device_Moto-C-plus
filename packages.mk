@@ -60,5 +60,5 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.kernel.android.checkjni=0
 
 #doze
-PRODUCT_PACKAGES += \
-    DozePanelli
+#PRODUCT_PACKAGES += \
+#    DozePanelli
