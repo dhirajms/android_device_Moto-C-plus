@@ -48,7 +48,7 @@ PRODUCT_PACKAGES += \
     charger_res_images \
     libnl_2 \
     libion \
-    SnapdragonCamera
+    Snap
 
 # FM
 PRODUCT_PACKAGES += \
