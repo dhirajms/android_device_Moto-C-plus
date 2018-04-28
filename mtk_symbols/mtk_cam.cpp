@@ -15,6 +15,17 @@
  */
 
 #include <string>
+#include <cutils/native_handle.h>
 
-extern "C" void _ZN7android13GraphicBufferC1EjjijjP13native_handleb() {}
 extern "C" void _ZNK7android16SensorEventQueue12enableSensorEPKNS_6SensorE() {}
+
+extern "C" void _ZN7android13GraphicBufferC1EjjijjjP13native_handleb(uint32_t inWidth, uint32_t inHeight, int inFormat,
+            uint32_t inLayerCount, uint32_t inUsage, uint32_t inStride,
+            native_handle_t* inHandle, bool keepOwnership);
+            
+extern "C" void _ZN7android13GraphicBufferC1EjjijjP13native_handleb(uint32_t inWidth, uint32_t inHeight, int inFormat,
+            uint32_t inLayerCount, uint32_t inUsage,
+            native_handle_t* inHandle, bool keepOwnership)
+{
+    _ZN7android13GraphicBufferC1EjjijjjP13native_handleb(inWidth, inHeight, inFormat, inLayerCount, inUsage, 0, inHandle, keepOwnership);
+}
