@@ -1,16 +1,3 @@
-From cea49ddcff404279921d1fdbeae16703bda1213a Mon Sep 17 00:00:00 2001
-From: darklord4822 <darklord4722@gmail.com>
-Date: Sun, 18 Feb 2018 08:52:32 +0000
-Subject: [PATCH] changes for MTK
-
-Change-Id: Ib60cbc88fef28a902f82d7c47a515484dac53976
----
- audio/2.0/default/Android.mk               | 4 ++++
- audio/2.0/default/StreamOut.cpp            | 3 +++
- camera/device/1.0/default/CameraDevice.cpp | 5 ++++-
- sensors/1.0/default/Sensors.cpp            | 2 +-
- 4 files changed, 12 insertions(+), 2 deletions(-)
-
 diff --git a/audio/2.0/default/Android.mk b/audio/2.0/default/Android.mk
 index 8dec482..8fc5131 100644
 --- a/audio/2.0/default/Android.mk
@@ -41,19 +28,18 @@ index 22dcd0c..81f1d58 100644
      struct timespec halTimeStamp;
      retval = Stream::analyzeStatus("get_presentation_position",
 diff --git a/camera/device/1.0/default/CameraDevice.cpp b/camera/device/1.0/default/CameraDevice.cpp
-index a03bbc8..d02fe63 100644
+index 116963b..dd97fa0 100644
 --- a/camera/device/1.0/default/CameraDevice.cpp
 +++ b/camera/device/1.0/default/CameraDevice.cpp
-@@ -36,6 +36,8 @@ using ::android::hardware::graphics::common::V1_0::PixelFormat;
- 
- HandleImporter CameraDevice::sHandleImporter;
+@@ -34,6 +34,7 @@ namespace implementation {
+ using ::android::hardware::graphics::common::V1_0::BufferUsage;
+ using ::android::hardware::graphics::common::V1_0::PixelFormat;
  
 +CameraDevice* sUser = nullptr;
-+
+ HandleImporter CameraDevice::sHandleImporter;
+ 
  Status CameraDevice::getHidlStatus(const int& status) {
-     switch (status) {
-         case 0: return Status::OK;
-@@ -361,7 +363,7 @@ CameraDevice::CameraHeapMemory::~CameraHeapMemory() {
+@@ -361,7 +362,7 @@ CameraDevice::CameraHeapMemory::~CameraHeapMemory() {
  // shared memory methods
  camera_memory_t* CameraDevice::sGetMemory(int fd, size_t buf_size, uint_t num_bufs, void *user) {
      ALOGV("%s", __FUNCTION__);
@@ -62,14 +48,14 @@ index a03bbc8..d02fe63 100644
      if (object->mDeviceCallback == nullptr) {
          ALOGE("%s: camera HAL request memory while camera is not opened!", __FUNCTION__);
          return nullptr;
-@@ -669,6 +671,7 @@ Return<Status> CameraDevice::open(const sp<ICameraDeviceCallback>& callback) {
-     mDeviceCallback = callback;
+@@ -673,6 +674,7 @@ Return<Status> CameraDevice::dumpState(const hidl_handle& handle) {
+     int fd = handle->data[0];
  
-     if (mDevice->ops->set_callbacks) {
-+        sUser = this;
-         mDevice->ops->set_callbacks(mDevice,
-                 sNotifyCb, sDataCb, sDataCbTimestamp, sGetMemory, this);
-     }
+     if (mDevice != nullptr) {
++           sUser = this;
+         if (mDevice->ops->dump) { // It's fine if the HAL doesn't implement dump()
+             return getHidlStatus(mDevice->ops->dump(mDevice, fd));
+         }
 diff --git a/sensors/1.0/default/Sensors.cpp b/sensors/1.0/default/Sensors.cpp
 index 1100dd6..c41a744 100644
 --- a/sensors/1.0/default/Sensors.cpp
@@ -83,6 +69,3 @@ index 1100dd6..c41a744 100644
  
      if (getHalDeviceVersion() == SENSORS_DEVICE_API_VERSION_1_4) {
          if (mSensorDevice->inject_sensor_data == nullptr) {
--- 
-1.9.1
-
