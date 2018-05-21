@@ -3,8 +3,8 @@
 # Release name
 PRODUCT_RELEASE_NAME := panelli
 
-# Inherit some common CM stuff.
-$(call inherit-product, vendor/cm/config/common_full_phone.mk)
+# Inherit some common crDroid stuff.
+$(call inherit-product, vendor/crDroid/config/common_full_phone.mk)
 
 # Inherit device configuration
 $(call inherit-product, device/moto/panelli/panelli.mk)
@@ -19,7 +19,7 @@ TARGET_BOOTANIMATION_TEXTURE_CACHE := true
 
 # Device identifier. This must come after all inclusions
 PRODUCT_DEVICE := panelli
-PRODUCT_NAME := lineage_panelli
+PRODUCT_NAME := crDroid_panelli
 PRODUCT_BRAND := Moto
 PRODUCT_MODEL := Moto C Plus
 PRODUCT_MANUFACTURER := Motorola
