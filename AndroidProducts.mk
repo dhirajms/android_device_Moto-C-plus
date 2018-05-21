@@ -1,2 +1,2 @@
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/panelli.mk
+    $(LOCAL_DIR)/crDroid_panelli.mk
