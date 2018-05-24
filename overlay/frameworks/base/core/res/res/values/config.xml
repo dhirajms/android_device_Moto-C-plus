@@ -131,21 +131,18 @@
     <bool name="config_automatic_brightness_available">true</bool>
 
     <integer-array name="config_autoBrightnessLevels">
-        <item>16</item>
-	<item>32</item>
-	<item>50</item>
-	<item>100</item>
-	<item>140</item>
-	<item>180</item>
-	<item>240</item>
-	<item>300</item>
-	<item>600</item>
-	<item>1000</item>
-	<item>2000</item>
-	<item>3000</item>
-	<item>4000</item>
-	<item>8000</item>
-	<item>10000</item>
+        <item>5</item>
+        <item>25</item>
+        <item>50</item>
+        <item>100</item>
+        <item>200</item>
+        <item>300</item>
+        <item>500</item>
+        <item>750</item>
+        <item>1000</item>
+        <item>1500</item>
+        <item>2000</item>
+        <item>10000</item>
     </integer-array>
     <!-- Array of output values for LCD backlight corresponding to the LUX values
          in the config_autoBrightnessLevels array.  This array should have size one greater
