@@ -146,24 +146,3 @@ WIFI_DRIVER_STATE_OFF := 0
 # Misc
 EXTENDED_FONT_FOOTPRINT := true
 
-# TWRP
-ifeq ($(WITH_TWRP),true)
-DEVICE_RESOLUTION := 720x1280
-DEVICE_SCREEN_WIDTH := 720
-DEVICE_SCREEN_HEIGHT := 1280
-TW_THEME := portrait_hdpi
-RECOVERY_VARIANT := twrp
-TARGET_RECOVERY_PIXEL_FORMAT := "RGBA_8888"
-TW_BRIGHTNESS_PATH := /sys/devices/platform/leds-mt65xx/leds/lcd-backlight/brightness
-TW_INCLUDE_FB2PNG := true
-TW_USE_MODEL_HARDWARE_ID_FOR_DEVICE_ID := true
-TW_DEVICE_VERSION := 0
-TW_USE_TOOLBOX := true
-RECOVERY_SDCARD_ON_DATA := true
-TW_INCLUDE_CRYPTO := true
-TW_MAX_BRIGHTNESS := 255
-TW_CUSTOM_CPU_TEMP_PATH := /sys/devices/virtual/thermal/thermal_zone1/temp
-TW_CUSTOM_BATTERY_PATH := "/sys/devices/platform/battery/power_supply/battery"
-TARGET_USE_CUSTOM_LUN_FILE_PATH := /sys/devices/platform/mt_usb/musb-hdrc.0.auto/gadget/lun%d/file
-TW_NO_SCREEN_BLANK := true
-endif
