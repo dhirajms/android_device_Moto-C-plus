@@ -42,9 +42,9 @@ on boot
     write /sys/module/process_reclaim/parameters/per_swap_size 512
     write /sys/module/lowmemorykiller/parameters/vmpressure_file_min 53059
     write /sys/module/lowmemorykiller/parameters/minfree "18432,23040,27648,32256,36864,46080"
-    write /proc/sys/vm/min_free_kbytes 2919
-    write /proc/sys/vm/extra_free_kbytes 6075
-    write /sys/kernel/mm/ksm/pages_to_scan 100
+    write /proc/sys/vm/min_free_kbytes 1024
+    write /proc/sys/vm/extra_free_kbytes 3075
+    write /sys/kernel/mm/ksm/pages_to_scan 150
     write /sys/kernel/mm/ksm/sleep_millisecs 500
     write /sys/kernel/mm/ksm/run 1
 

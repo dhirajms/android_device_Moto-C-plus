@@ -97,6 +97,13 @@ on post-fs
     chown system system /protect_s
     chmod 0770 /protect_s
 
+on late-fs
+    # boot time fs tune
+    write /sys/block/mmcblk0/queue/iostats 0
+    write /sys/block/mmcblk0/queue/iosched/slice_idle 0
+    write /sys/block/mmcblk0/queue/read_ahead_kb 2048
+    write /sys/block/mmcblk0/queue/nr_requests 256
+
 on post-fs-data
     write /proc/bootprof "INIT:post-fs-data"
 
@@ -691,6 +698,11 @@ on boot
     chown system /dev/ttyGS0
     chmod 660 /dev/ttyGS1
     chown system /dev/ttyGS1
+
+on property:sys.boot_completed=1
+    write /sys/block/mmcblk0/queue/read_ahead_kb 128
+    write /sys/block/mmcblk0/queue/nr_requests 128
+    write /sys/block/mmcblk0/queue/iostats 1
 
 on property:vold.decrypt=trigger_reset_main
     write /proc/bootprof "INIT:vold.decrypt=trigger_reset_main"
