@@ -69,6 +69,10 @@ BOARD_MKBOOTIMG_ARGS := --kernel_offset $(BOARD_KERNEL_OFFSET) --ramdisk_offset 
 KERNEL_TOOLCHAIN := $(ANDROID_BUILD_TOP)/prebuilts/gcc/$(HOST_OS)-x86/arm/arm-linux-androideabi-4.9/bin
 TARGET_KERNEL_CROSS_COMPILE_PREFIX := arm-linux-androideabi-
 
+#sdclang
+TARGET_USE_SDCLANG := false
+SDCLANG := false
+
 #bootloader
 TARGET_BOOTLOADER_BOARD_NAME := mt6737m
 
