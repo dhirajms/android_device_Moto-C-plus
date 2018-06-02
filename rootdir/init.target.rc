@@ -31,9 +31,12 @@ on post-fs-data
 
     chmod 0666 /dev/exm0
 
-on boot
-    # Enable KSM
+on post-fs
     swapon_all fstab.mt6735
+    write /proc/sys/vm/page-cluster 0
+    write /proc/sys/vm/swappiness 30
+    
+on boot
     write /sys/module/process_reclaim/parameters/enable_process_reclaim 1
     write /sys/module/process_reclaim/parameters/pressure_max 70
     write /sys/module/process_reclaim/parameters/swap_opt_eff 30
