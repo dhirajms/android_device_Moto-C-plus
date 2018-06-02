@@ -88,6 +88,10 @@ BOARD_HAVE_BLUETOOTH := true
 BOARD_USES_CYANOGEN_HARDWARE := true
 BOARD_HARDWARE_CLASS += device/moto/panelli/cmhw
 
+# Charger
+BOARD_CHARGER_DISABLE_INIT_BLANK := true
+BACKLIGHT_PATH := /sys/class/leds/lcd-backlight/brightness
+
 #dexopt
 WITH_DEXPREOPT := false
 
